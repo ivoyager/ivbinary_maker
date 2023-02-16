@@ -42,6 +42,7 @@ func _extension_init() -> void:
 	
 	IVProjectBuilder.prog_refs = {
 		_TableReader_ = IVTableReader,
+		_AsteroidConverter_ = AsteroidConverter,
 	}
 	
 	IVProjectBuilder.gui_nodes = {
