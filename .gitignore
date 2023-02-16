@@ -1,0 +1,6 @@
+# ignore:
+~*
+*.translation
+\.import/
+ivoyager_assets*/
+export/
