@@ -1,4 +1,4 @@
-# huds_panel.gd
+# gui.gd
 # This file is part of I, Voyager
 # https://ivoyager.dev
 # *****************************************************************************
@@ -17,17 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # *****************************************************************************
-#
-# THIS IS AN EXAMPLE GUI SCENE! You can modify it or replace it.
-
-extends PanelContainer
-
-
-func _ready() -> void:
-	$ControlSized.default_sizes = [
-	Vector2(320.0, 291.0), # GUI_SMALL
-	Vector2(420.0, 354.0), # GUI_MEDIUM
-	Vector2(523.0, 421.0), # GUI_LARGE
-]
-
+class_name GUI
+extends Control
+const SCENE := "res://ivbinary_maker/gui.tscn"
 

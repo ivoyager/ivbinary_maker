@@ -4,3 +4,9 @@
 \.import/
 ivoyager_assets*/
 export/
+
+# ivbinary_maker source & export:
+source_data/asteroids/
+source_data/comets/
+ivbinary_export/asteroids/
+ivbinary_export/comets/
