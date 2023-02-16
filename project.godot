@@ -10,9 +10,9 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Control",
-"class": "GameGUI",
+"class": "GUI",
 "language": "GDScript",
-"path": "res://replace_me/gui_example/game_gui.gd"
+"path": "res://ivbinary_maker/gui.gd"
 }, {
 "base": "VBoxContainer",
 "class": "IVAllHUDsGrids",
@@ -579,11 +579,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://ivoyager/tree_nodes/world_controller.gd"
 }, {
-"base": "Control",
-"class": "PBDSplashScreen",
-"language": "GDScript",
-"path": "res://replace_me/gui_example/pbd_splash_screen.gd"
-}, {
 "base": "Object",
 "class": "SIBaseUnits",
 "language": "GDScript",
@@ -595,7 +590,7 @@ _global_script_classes=[ {
 "path": "res://ivoyager/initializers/shared_initializer.gd"
 } ]
 _global_script_class_icons={
-"GameGUI": "",
+"GUI": "",
 "IVAllHUDsGrids": "",
 "IVAssetInitializer": "",
 "IVAsteroidsGrid": "",
@@ -709,18 +704,16 @@ _global_script_class_icons={
 "IVWikiManager": "",
 "IVWindowManager": "",
 "IVWorldController": "",
-"PBDSplashScreen": "",
 "SIBaseUnits": "",
 "SharedInitializer": ""
 }
 
 [application]
 
-config/name="I, Voyager - Project Template"
+config/name="ivbinary_maker"
 run/main_scene="res://ivoyager/tree_nodes/universe.tscn"
-boot_splash/image="res://replace_me/gui_example/pale_blue_dot.png"
+boot_splash/show_image=false
 boot_splash/bg_color=Color( 0, 0, 0, 1 )
-config/icon="res://replace_me/jupiter-icon-128.png"
 main_scene="res://universe.tscn"
 name="I, Voyager - Project Template"
 icon="res://jupiter-icon-128.png"

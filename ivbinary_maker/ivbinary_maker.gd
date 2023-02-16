@@ -1,4 +1,4 @@
-# navigation_panel.gd
+# ivbinary_maker.gd
 # This file is part of I, Voyager
 # https://ivoyager.dev
 # *****************************************************************************
@@ -18,29 +18,40 @@
 # limitations under the License.
 # *****************************************************************************
 #
-# THIS IS AN EXAMPLE GUI SCENE! You can modify it or replace it.
-#
+# We need only a few items from ivoyager, which are added here or used directly
+# in 'converter' classes.
 
 
-extends PanelContainer
+const EXTENSION_NAME := "ivbinary_maker"
+const EXTENSION_VERSION := "0.0.1-DEV"
+const EXTENSION_VERSION_YMD := 20230216
 
-var _settings: Dictionary = IVGlobal.settings
 
+func _extension_init() -> void:
+	prints(EXTENSION_NAME, EXTENSION_VERSION, EXTENSION_VERSION_YMD)
 
-func _ready() -> void:
-	IVGlobal.connect("update_gui_requested", self, "_resize")
-	IVGlobal.connect("setting_changed", self, "_settings_listener")
+	IVGlobal.connect("project_objects_instantiated", self, "_on_project_objects_instantiated")
 	
-	# widgets
-	$"%AsteroidsHScroll".add_bodies_from_table("asteroids")
-	$"%SpacecraftHScroll".add_bodies_from_table("spacecrafts")
+	IVProjectBuilder.prog_builders.clear()
+	IVProjectBuilder.prog_nodes.clear()
+	IVProjectBuilder.procedural_classes.clear()
+	
+	IVProjectBuilder.initializers = {
+		_TableImporter_ = IVTableImporter,
+	}
+	
+	IVProjectBuilder.prog_refs = {
+		_TableReader_ = IVTableReader,
+	}
+	
+	IVProjectBuilder.gui_nodes = {
+		_ProjectGUI_ = GUI,
+	}
 
 
-func _resize() -> void:
+
+
+func _on_project_objects_instantiated() -> void:
 	pass
-#	never mind...
 
 
-func _settings_listener(setting: String, _value) -> void:
-	if setting == "gui_size":
-		_resize()
