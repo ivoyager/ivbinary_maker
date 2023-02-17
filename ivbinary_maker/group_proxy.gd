@@ -27,19 +27,24 @@ extends Reference
 
 # below is binary import data
 var names := PoolStringArray()
-var iau_numbers := PoolIntArray() # -1 for unnumbered
+var iau_numbers := PoolIntArray() # DEPRECIATE
 var magnitudes := PoolRealArray()
+
+
+var e_i_Om_w := PoolColorArray() # common (e librates for secular resonance)
+var a_M0_n := PoolVector3Array() # librating in l-point objects
+var s_g := PoolVector2Array() # orbit precessions
+var da_D_f := PoolVector3Array() # Trojans: a, L ampltude, and frequency
+var th0_de := PoolVector2Array() # libration angle at epoch [, e amplitude for sec res]
 
 var dummy_translations := PoolVector3Array() # all 0's
 
 # non-Trojans - arrays pre-structured for MeshArray construction
 var a_e_i := PoolVector3Array()
 var Om_w_M0_n := PoolColorArray()
-var s_g := PoolVector2Array() # TODO: implement these orbit precessions
 # Trojans - arrays pre-structured for MeshArray construction
 var d_e_i := PoolVector3Array()
 var Om_w_D_f := PoolColorArray()
-var th0 := PoolVector2Array()
 
 
 # *****************************************************************************
@@ -64,7 +69,7 @@ func expand_arrays(n: int) -> void:
 	else:
 		d_e_i.resize(n + d_e_i.size())
 		Om_w_D_f.resize(n + Om_w_D_f.size())
-		th0.resize(n + th0.size())
+		th0_de.resize(n + th0_de.size())
 
 
 func set_data(name_: String, magnitude: float, keplerian_elements: Array, iau_number := -1) -> void:
@@ -84,7 +89,7 @@ func set_trojan_data(name_: String, magnitude: float, keplerian_elements: Array,
 	dummy_translations[_index] = Vector3(0.0, 0.0, 0.0)
 	d_e_i[_index] = Vector3(trojan_elements[0], keplerian_elements[1], keplerian_elements[2]) # d, e, i
 	Om_w_D_f[_index] = Color(keplerian_elements[3], keplerian_elements[4], trojan_elements[1], trojan_elements[2]) # Om, w, D, f
-	th0[_index] = Vector2(trojan_elements[3], 0.0) # th0
+	th0_de[_index] = Vector2(trojan_elements[3], 0.0) # th0_de
 	_index += 1
 
 
@@ -93,7 +98,7 @@ func write_binary(binary: File) -> void:
 	if !is_trojans:
 		binary_data = [names, iau_numbers, magnitudes, dummy_translations, a_e_i, Om_w_M0_n]
 	else:
-		binary_data = [names, iau_numbers, magnitudes, dummy_translations, d_e_i, Om_w_D_f, th0]
+		binary_data = [names, iau_numbers, magnitudes, dummy_translations, d_e_i, Om_w_D_f, th0_de]
 	binary.store_var(binary_data)
 
 
@@ -106,7 +111,7 @@ func clear_for_import() -> void:
 	Om_w_M0_n.resize(0)
 	d_e_i.resize(0)
 	Om_w_D_f.resize(0)
-	th0.resize(0)
+	th0_de.resize(0)
 	_index = 0
 
 

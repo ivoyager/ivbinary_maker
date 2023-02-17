@@ -99,13 +99,12 @@ func add_multiopposition() -> void:
 
 func revise_names() -> void:
 	# The name file used here and asteroid numbered file both both have
-	# line number = asteroid number. We test that and use for indexing.
+	# line number = asteroid number (not counting header). We test that and use for indexing.
 	var index := 0
 	var count := 0
 	var path := SOURCE_PATH + ASTEROID_NAMES_FILE
 	var read_file = File.new()
 	if read_file.open(path, File.READ) != OK:
-#		print("Could not open ", path)
 		_update_status(REVISE_NAMES, "Could not open " + path)
 		return
 	var line: String = read_file.get_line()
@@ -126,8 +125,6 @@ func revise_names() -> void:
 				astdys2_name = astdys2_name.strip_edges(false, true)
 		if astdys2_name:
 			count += 1
-#			if not _astdys2_lookup.has(astdys2_name):
-#				_fallback_lookup_table[astdys2_name] = index
 			astdys2_name = str(number) + " " + astdys2_name
 			if count == status_index:
 				_update_status(REVISE_NAMES, "%s count (renamed: \"%s\" to \"%s\""
@@ -139,18 +136,18 @@ func revise_names() -> void:
 	read_file.close()
 	_update_status(REVISE_NAMES, str(count) + " renamed")
 
+
 func revise_proper() -> void:
 	# TODO: Secular resonant are only partially implemented (we simply skip e here)
 	var revised := 0
 	var n_not_found := 0
 	var status_index := STATUS_INTERVAL
 	for file_name in ASTEROID_PROPER_ELEMENTS_FILES:
-		var secular_resonance: bool = file_name == SECULAR_RESONANT_FILE
-		print("secular_resonance ", secular_resonance)
+		var is_sec_res: bool = file_name == SECULAR_RESONANT_FILE
+		print("is_sec_res ", is_sec_res)
 		var path: String = SOURCE_PATH + file_name
 		var read_file := File.new()
 		if read_file.open(path, File.READ) != OK:
-#			print("Could not open ", path)
 			_update_status(REVISE_PROPER, "Could not open " + path)
 			continue
 		var line := read_file.get_line()
@@ -163,32 +160,19 @@ func revise_proper() -> void:
 			var index: int
 			if _astdys2_lookup.has(astdys2_name):
 				index = _astdys2_lookup[astdys2_name]
-	#		elif _fallback_lookup_table.has(astdys2_name):
-	#			index = _fallback_lookup_table[astdys2_name]
 			else:
 				n_not_found += 1
 				line = read_file.get_line()
 				continue
-			var mag_str: String = line_array[1]
-			if mag_str == "-9.99":
-				if REJECT_999:
-					line = read_file.get_line()
-					continue
-				else:
-					mag_str = "99"
-			var magnitude := float(mag_str)
 			var proper_a := float(line_array[2]) # in au
 			var proper_e := float(line_array[3])
 			var proper_i := asin(float(line_array[4])) # file has sin(i)
 			var proper_n := deg2rad(float(line_array[5])) # now rad/yr
 			_asteroid_elements[index * N_ELEMENTS] = proper_a
-			if not secular_resonance:
+			if not is_sec_res:
 				_asteroid_elements[index * N_ELEMENTS + 1] = proper_e
 			_asteroid_elements[index * N_ELEMENTS + 2] = proper_i
 			_asteroid_elements[index * N_ELEMENTS + 6] = proper_n
-			# Note: Magnitues in .syn files are not EXACTLY the same as .cat.
-			# Can magnitude be "proper"? In any case, we replace it.
-			_asteroid_elements[index * N_ELEMENTS + 7] = magnitude
 			revised += 1
 			if revised == status_index:
 				_update_status(REVISE_PROPER, "%s orbits revised to proper" % revised)
@@ -221,32 +205,21 @@ func revise_trojans() -> void:
 		var index: int
 		if _astdys2_lookup.has(astdys2_name):
 			index = _astdys2_lookup[astdys2_name]
-#		elif _fallback_lookup_table.has(astdys2_name):
-#			index = _fallback_lookup_table[astdys2_name]
 		else:
 			n_not_found += 1
 			line = read_file.get_line()
 			continue
-		var mag_str: String = line_array[1]
-		if mag_str == "-9.99":
-			if REJECT_999:
-				line = read_file.get_line()
-				continue
-			else:
-				mag_str = "99"
-		var magnitude := float(mag_str)
-		var d := float(line_array[2]) # au
+		var da := float(line_array[2]) # au
 		var D := deg2rad(float(line_array[3])) # deg -> rad
 		var f := deg2rad(float(line_array[4])) # deg/y -> rad/y
 		var proper_e := float(line_array[5])
 		var proper_i := asin(float(line_array[7])) # file has sin(i)
-		var l_point: String = line_array[9] # either "4" or "5"
+		var l_point := float(line_array[9]) # either "4" or "5"
 		# Regular propers
 		_asteroid_elements[index * N_ELEMENTS + 1] = proper_e
 		_asteroid_elements[index * N_ELEMENTS + 2] = proper_i
-		_asteroid_elements[index * N_ELEMENTS + 7] = magnitude
 		# Trojan data
-		_trojan_elements[index] = [l_point, d, D, f]
+		_trojan_elements[index] = [l_point, da, D, f]
 		
 		revised += 1
 		if revised == status_index:
@@ -267,8 +240,6 @@ func make_binary_files() -> void:
 	# [<n_indexes>, <N_ELEMENTS>, <_asteroid_elements>, <_asteroid_names>,
 	# <trojan_elements or null>]
 	
-#	var group_data: Array = _table_data.asteroid_groups
-#	var group_fields: Dictionary = _table_fields.asteroid_groups
 	var tot_indexes := _asteroid_names.size()
 	_update_status(MAKE_BINARY_FILES, "tot_indexes: %s" % tot_indexes)
 	print("N_ELEMENTS: ", N_ELEMENTS)
@@ -340,8 +311,11 @@ func make_binary_files() -> void:
 				continue
 			# passes all criteria, so add index to a group
 			if is_trojan:
-				var l_point: String = _trojan_elements[index][0]
-				index_dict[group + l_point][mag_str].append(index)
+				var lp_str := str(_trojan_elements[index][0]) # "4" or "5"
+				
+				assert(lp_str == "4" or lp_str == "5")
+				
+				index_dict[group + lp_str][mag_str].append(index)
 			else:
 				index_dict[group][mag_str].append(index)
 			added += 1
@@ -440,6 +414,9 @@ func _read_astdys_cat_file(data_file: String, func_type: int) -> void:
 				mag_str = "99"
 		var astdys2_name: String = line_array[0]
 		astdys2_name = astdys2_name.replace("'", "")
+		
+		assert(!_astdys2_lookup.has(astdys2_name), "Duplicate name: " + astdys2_name)
+		
 		_astdys2_lookup[astdys2_name] = _index
 		_asteroid_names.append(astdys2_name)
 		_asteroid_elements.append(float(line_array[2])) # a (in au)
@@ -453,9 +430,6 @@ func _read_astdys_cat_file(data_file: String, func_type: int) -> void:
 		for _i in range(N_ELEMENTS - 8):
 			 _asteroid_elements.append(0.0) # will be s, g, L from propers
 		
-		if _index > 0:
-			assert(astdys2_name != _asteroid_names[_index - 1], "Duplicate entry for " + astdys2_name)
-		
 		line = read_file.get_line()
 		_index += 1
 		if _index == status_index:
@@ -467,7 +441,6 @@ func _read_astdys_cat_file(data_file: String, func_type: int) -> void:
 	read_file.close()
 	_update_status(func_type, str(_index) + " total asteroids")
 	
-	prints(_asteroid_names.size(), _asteroid_names[0], _asteroid_names[-1])
 
 
 func _update_status(func_type: int, message: String) -> void:
