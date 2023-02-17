@@ -54,10 +54,10 @@ const DESCRIPTIONS := [
 
 var _status_labels := []
 
-onready var _asteroid_converter: AsteroidConverter = IVGlobal.program.AsteroidConverter
+onready var _asteroids_converter: AsteroidsConverter = IVGlobal.program.AsteroidsConverter
 
 func _ready() -> void:
-	_asteroid_converter.connect("status", self, "_on_status")
+	_asteroids_converter.connect("status", self, "_on_status")
 	
 	var func_type := 0
 	while func_type < METHODS.size():
@@ -81,8 +81,8 @@ func _ready() -> void:
 
 
 func _run_function(func_type: int) -> void:
-	_asteroid_converter.call(METHODS[func_type])
-	if func_type == _asteroid_converter.START_OVER:
+	_asteroids_converter.call_method(METHODS[func_type])
+	if func_type == _asteroids_converter.START_OVER:
 		for i in METHODS.size():
 			_status_labels[func_type].text = ""
 

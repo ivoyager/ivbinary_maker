@@ -17,8 +17,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # *****************************************************************************
-class_name AsteroidConverter
+class_name AsteroidsConverter
 extends Reference
+
+const math := preload("res://ivoyager/static/math.gd")
+const files := preload("res://ivoyager/static/files.gd")
+
 
 signal status(func_type, message)
 
@@ -34,10 +38,8 @@ enum { # func_type
 }
 
 
-const math := preload("res://ivoyager/static/math.gd")
-const files := preload("res://ivoyager/static/files.gd")
+const USE_THREAD := false # false for debug
 
-const DEBUG_PRINT_BINARY_TEXT := false
 const REJECT_999 := false # reject mag "-9.99"; if false, accept but change to "99"
 const N_ELEMENTS := 10
 
@@ -57,7 +59,7 @@ const BINARY_FILE_MAGNITUDES = IVSmallBodiesBuilder.BINARY_FILE_MAGNITUDES
 
 var _tables: Dictionary = IVGlobal.tables
 var _table_reader: IVTableReader
-var _thread := Thread.new()
+var _thread: Thread
 
 # current processing
 var _asteroid_elements := PoolRealArray()
@@ -70,12 +72,17 @@ var _index := 0
 
 func _project_init() -> void:
 	_table_reader = IVGlobal.program.TableReader
+	if USE_THREAD:
+		_thread = Thread.new()
 
 
-func call_on_thread(method: String) -> void:
-	if _thread.is_active():
-		_thread.wait_to_finish()
-	_thread.start(self, "_run_in_thread", method)
+func call_method(method: String) -> void:
+	if USE_THREAD:
+		if _thread.is_active():
+			_thread.wait_to_finish()
+		_thread.start(self, "_run_in_thread", method)
+	else:
+		call(method)
 	
 
 func _run_in_thread(method: String) -> void:
@@ -189,6 +196,7 @@ func revise_proper() -> void:
 			line = read_file.get_line()
 		read_file.close()
 	_update_status(REVISE_PROPER, "%s orbits revised to proper\n(Did not find %s)" % [revised, n_not_found])
+
 
 func revise_trojans() -> void:
 	# For trojans, we revise to proper e & i and save L-point, d, D & f in
@@ -351,18 +359,18 @@ func make_binary_files() -> void:
 	print("Writing binaries to ", WRITE_BINARIES_DIR)
 	files.make_or_clear_dir(WRITE_BINARIES_DIR)
 	
-	var asteroid_group := IVSmallBodiesGroup.new()
+	var group_proxy := GroupProxy.new()
 	
 	for file_group in index_dict:
 		var is_trojans: bool = trojan_file_groups.has(file_group)
+		group_proxy.is_trojans = is_trojans
 		for mag_str in index_dict[file_group]:
 			var indexes: Array = index_dict[file_group][mag_str]
 			var n_indexes := indexes.size()
 			if n_indexes == 0:
 				continue
-			asteroid_group.clear_for_import()
-			asteroid_group.is_trojans = is_trojans # bypassing init
-			asteroid_group.expand_arrays(n_indexes)
+			group_proxy.clear_for_import()
+			group_proxy.expand_arrays(n_indexes)
 			for index in indexes:
 				var name_: String = _asteroid_names[index]
 				var keplerian_elements := []
@@ -373,7 +381,7 @@ func make_binary_files() -> void:
 					i += 1
 				var magnitude: float = _asteroid_elements[index * N_ELEMENTS + 7]
 				if not is_trojans:
-					asteroid_group.set_data(name_, magnitude, keplerian_elements)
+					group_proxy.set_data(name_, magnitude, keplerian_elements)
 				else:
 					var interm_trojan_elements: Array = _trojan_elements[index]
 					var d: float = interm_trojan_elements[1]
@@ -381,7 +389,7 @@ func make_binary_files() -> void:
 					var f: float = interm_trojan_elements[3]
 					var th0: float = 0.0 # calculated on import
 					var trojan_elements := [d, D, f, th0]
-					asteroid_group.set_trojan_data(name_, magnitude, keplerian_elements, trojan_elements)
+					group_proxy.set_trojan_data(name_, magnitude, keplerian_elements, trojan_elements)
 		
 			var file_name := "%s.%s.%s" % [file_group, mag_str, BINARIES_EXTENSION]
 			_update_status(MAKE_BINARY_FILES,"%s (number indexes: %s)" % [file_name, n_indexes])
@@ -391,7 +399,7 @@ func make_binary_files() -> void:
 #				print("Could not write ", path)
 				_update_status(MAKE_BINARY_FILES,"Could not write " + path)
 				return
-			asteroid_group.write_binary(binary)
+			group_proxy.write_binary(binary)
 			binary.close()
 
 	_update_status(MAKE_BINARY_FILES, "%s asteroids written to binaries\n(of %s total)"

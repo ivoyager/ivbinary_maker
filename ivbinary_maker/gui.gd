@@ -19,5 +19,5 @@
 # *****************************************************************************
 class_name GUI
 extends Control
-const SCENE := "res://ivbinary_maker/gui/gui.tscn"
+const SCENE := "res://ivbinary_maker/gui.tscn"
 
