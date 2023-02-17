@@ -37,23 +37,33 @@ enum { # func_type
 	START_OVER,
 }
 
-
+# settings
 const USE_THREAD := false # false for debug
-
 const REJECT_999 := false # reject mag "-9.99"; if false, accept but change to "99"
-const N_ELEMENTS := 10
+const STATUS_INTERVAL := 20000
 
+# read/write
 const SOURCE_PATH := "res://source_data/asteroids/"
-const WRITE_BINARIES_DIR := "res://ivbinary_export/asteroid_binaries"
-const BINARIES_EXTENSION := "vbinary"
+const EXPORT_DIR := "res://ivbinary_export/asteroid_binaries"
+const BINARIES_EXTENSION := "ivbinary"
+
+# source data
+const CAT_EPOCH := 60000.0 # This changes! Check 'Epoch(MJD)' in *.cat files!
+const J2000_SEC := (CAT_EPOCH - 51544.5) * 86400.0 # seconds from our internal J2000 epoch
 const ASTEROID_ORBITAL_ELEMENTS_NUMBERED_FILE := "allnum.cat"
 const ASTEROID_ORBITAL_ELEMENTS_MULTIOPPOSITION_FILE := "ufitobs.cat"
 const ASTEROID_PROPER_ELEMENTS_FILES := ["all.syn", "tno.syn", "secres.syn"]
 const SECULAR_RESONANT_FILE := "secres.syn" # This one in above list, but special
 const TROJAN_PROPER_ELEMENTS_FILE := "tro.syn"
 const ASTEROID_NAMES_FILE := "discover.tab"
-const STATUS_INTERVAL := 20000
 
+# units and standard gravitational parameter (binaries use  SI & radians)
+const YEAR := 365.25 * 24.0 * 3600.0 # s; this is exact for Julian year
+const AU := 149597870700.0 # m
+const GM := 1.32712440042e20 # m^3 s^-2 (used only if we don't have proper elements)
+
+# internal
+const N_ELEMENTS := 12 # [a, e, i, Om, w, M0, n, M, mag, s, g, de]
 const BINARY_FILE_MAGNITUDES = IVSmallBodiesBuilder.BINARY_FILE_MAGNITUDES
 
 
@@ -164,15 +174,30 @@ func revise_proper() -> void:
 				n_not_found += 1
 				line = read_file.get_line()
 				continue
-			var proper_a := float(line_array[2]) # in au
-			var proper_e := float(line_array[3])
-			var proper_i := asin(float(line_array[4])) # file has sin(i)
-			var proper_n := deg2rad(float(line_array[5])) # now rad/yr
+			var proper_a := float(line_array[2]) * AU
+			var proper_e := float(line_array[3]) # really de in secular resonant
+			var proper_i := asin(float(line_array[4])) # sin(i) -> i
+			var proper_n := deg2rad(float(line_array[5])) / YEAR # deg/yr -> rad/s
+			var g := deg2rad(float(line_array[6]) / 3600.0) / YEAR # "/yr -> rad/s
+			var s := deg2rad(float(line_array[7]) / 3600.0) / YEAR # "/yr -> rad/s
+			
+			# [a, e, i, Om, w, M0, n, M, mag, s, g, de]
+			
+			# recalculate M0 using proper_n
+			var M: float = _asteroid_elements[index * N_ELEMENTS + 7]
+			var M0 := wrapf(M - proper_n * J2000_SEC, 0.0, TAU) # replaced if we have proper elements
+			_asteroid_elements[index * N_ELEMENTS + 5] = M0
+			
+			# set proper elements
 			_asteroid_elements[index * N_ELEMENTS] = proper_a
-			if not is_sec_res:
+			if is_sec_res:
+				_asteroid_elements[index * N_ELEMENTS + 11] = proper_e
+			else:
 				_asteroid_elements[index * N_ELEMENTS + 1] = proper_e
 			_asteroid_elements[index * N_ELEMENTS + 2] = proper_i
 			_asteroid_elements[index * N_ELEMENTS + 6] = proper_n
+			_asteroid_elements[index * N_ELEMENTS + 9] = s
+			_asteroid_elements[index * N_ELEMENTS + 10] = g
 			revised += 1
 			if revised == status_index:
 				_update_status(REVISE_PROPER, "%s orbits revised to proper" % revised)
@@ -209,17 +234,30 @@ func revise_trojans() -> void:
 			n_not_found += 1
 			line = read_file.get_line()
 			continue
-		var da := float(line_array[2]) # au
+		var da := float(line_array[2]) * AU
 		var D := deg2rad(float(line_array[3])) # deg -> rad
-		var f := deg2rad(float(line_array[4])) # deg/y -> rad/y
+		var f := deg2rad(float(line_array[4])) / YEAR # deg/y -> rad/s
 		var proper_e := float(line_array[5])
-		var proper_i := asin(float(line_array[7])) # file has sin(i)
-		var l_point := float(line_array[9]) # either "4" or "5"
+		var g := deg2rad(float(line_array[6]) / 3600.0) / YEAR # "/yr -> rad/s
+		var proper_i := asin(float(line_array[7])) # sin(i) -> i
+		var s := deg2rad(float(line_array[8]) / 3600.0) / YEAR # "/yr -> rad/s
+		var l_point := float(line_array[9]) # "4" or "5" -> 4.0 or 5.0
+		assert(l_point == 4.0 or l_point == 5.0)
+		
+		# [a, e, i, Om, w, M0, n, M, mag, s, g, de]
+		
+		# TODO: Given M, a, D, da & f (& s, g), approximate theta & theta0.
+		# (a, M0 & n change w/ libration, so we don't need to fix here.)
+		var th0 := rand_range(0.0, TAU) # just random for now...
+		
 		# Regular propers
+		# [a, e, i, Om, w, M0, n, M, mag, s, g, de]
 		_asteroid_elements[index * N_ELEMENTS + 1] = proper_e
 		_asteroid_elements[index * N_ELEMENTS + 2] = proper_i
+		_asteroid_elements[index * N_ELEMENTS + 9] = s
+		_asteroid_elements[index * N_ELEMENTS + 10] = g
 		# Trojan data
-		_trojan_elements[index] = [l_point, da, D, f]
+		_trojan_elements[index] = [l_point, da, D, f, th0]
 		
 		revised += 1
 		if revised == status_index:
@@ -274,7 +312,6 @@ func make_binary_files() -> void:
 				index_dict[group + "5"][mag_str] = []
 
 	var all_criteria := {}
-	var au := IVUnits.AU
 	for row in n_groups:
 		var group := _table_reader.get_string("asteroid_groups", "group", row)
 		var min_q := _table_reader.get_real("asteroid_groups", "min_q", row)
@@ -282,20 +319,20 @@ func make_binary_files() -> void:
 		var min_a := _table_reader.get_real("asteroid_groups", "min_a", row)
 		var max_a := _table_reader.get_real("asteroid_groups", "max_a", row)
 		
-		# FIXME: Duplicate unit conversion ????
 		
 		all_criteria[group] = {
-			min_q = min_q / au if !is_nan(min_q) else 0.0,
-			max_q = max_q / au if !is_nan(max_q) else INF,
-			min_a = min_a / au if !is_nan(min_a) else 0.0,
-			max_a = max_a / au if !is_nan(max_a) else INF,
+			min_q = min_q if !is_nan(min_q) else 0.0,
+			max_q = max_q if !is_nan(max_q) else INF,
+			min_a = min_a if !is_nan(min_a) else 0.0,
+			max_a = max_a if !is_nan(max_a) else INF,
 		}
 	var status_index := STATUS_INTERVAL
 	for index in range(tot_indexes):
+		# [a, e, i, Om, w, M0, n, M, mag, s, g, de]
 		var a: float = _asteroid_elements[index * N_ELEMENTS]
 		var e: float = _asteroid_elements[index * N_ELEMENTS + 1]
 		var q: float = (1.0 - e) * a
-		var magnitude: float = _asteroid_elements[index * N_ELEMENTS + 7]
+		var magnitude: float = _asteroid_elements[index * N_ELEMENTS + 8]
 		var mag_index := mags.bsearch(magnitude)
 		if mag_index >= BINARY_FILE_MAGNITUDES.size():
 			mag_index = BINARY_FILE_MAGNITUDES.size() - 1
@@ -330,8 +367,8 @@ func make_binary_files() -> void:
 				% [added, tot_indexes])
 	
 	# Write binaries
-	print("Writing binaries to ", WRITE_BINARIES_DIR)
-	files.make_or_clear_dir(WRITE_BINARIES_DIR)
+	print("Writing binaries to ", EXPORT_DIR)
+	files.make_or_clear_dir(EXPORT_DIR)
 	
 	var group_proxy := GroupProxy.new()
 	
@@ -350,24 +387,25 @@ func make_binary_files() -> void:
 				var keplerian_elements := []
 				keplerian_elements.resize(7)
 				var i := 0
-				while i < 7:
+				# [a, e, i, Om, w, M0, n, M, mag, s, g, de]
+				while i < 7: # first 7 are our canonical elements
 					keplerian_elements[i] = _asteroid_elements[index * N_ELEMENTS + i]
 					i += 1
-				var magnitude: float = _asteroid_elements[index * N_ELEMENTS + 7]
+				var magnitude: float = _asteroid_elements[index * N_ELEMENTS + 8]
 				if not is_trojans:
 					group_proxy.set_data(name_, magnitude, keplerian_elements)
 				else:
-					var interm_trojan_elements: Array = _trojan_elements[index]
-					var d: float = interm_trojan_elements[1]
-					var D: float = interm_trojan_elements[2]
-					var f: float = interm_trojan_elements[3]
-					var th0: float = 0.0 # calculated on import
-					var trojan_elements := [d, D, f, th0]
-					group_proxy.set_trojan_data(name_, magnitude, keplerian_elements, trojan_elements)
+#					var interm_trojan_elements: Array = _trojan_elements[index]
+#					var d: float = interm_trojan_elements[1]
+#					var D: float = interm_trojan_elements[2]
+#					var f: float = interm_trojan_elements[3]
+#					var th0: float = 0.0 # calculated on import
+#					var trojan_elements := [d, D, f, th0]
+					group_proxy.set_trojan_data(name_, magnitude, keplerian_elements, _trojan_elements[index])
 		
 			var file_name := "%s.%s.%s" % [file_group, mag_str, BINARIES_EXTENSION]
 			_update_status(MAKE_BINARY_FILES,"%s (number indexes: %s)" % [file_name, n_indexes])
-			var path := WRITE_BINARIES_DIR + "/" + file_name
+			var path := EXPORT_DIR + "/" + file_name
 			var binary := File.new()
 			if binary.open(path, File.WRITE) != OK:
 #				print("Could not write ", path)
@@ -419,16 +457,32 @@ func _read_astdys_cat_file(data_file: String, func_type: int) -> void:
 		
 		_astdys2_lookup[astdys2_name] = _index
 		_asteroid_names.append(astdys2_name)
-		_asteroid_elements.append(float(line_array[2])) # a (in au)
-		_asteroid_elements.append(float(line_array[3])) # e
-		_asteroid_elements.append(deg2rad(float(line_array[4]))) # i
-		_asteroid_elements.append(deg2rad(float(line_array[5]))) # Om
-		_asteroid_elements.append(deg2rad(float(line_array[6]))) # w
-		_asteroid_elements.append(deg2rad(float(line_array[7]))) # M0
-		_asteroid_elements.append(0.0) # n; needed for proper orbits
+		
+		var a := float(line_array[2]) * AU
+		var e := float(line_array[3])
+		var i := deg2rad(float(line_array[4]))
+		var Om := deg2rad(float(line_array[5]))
+		var w := deg2rad(float(line_array[6]))
+		var M := deg2rad(float(line_array[7]))
+		
+		var n := sqrt(GM / (a * a * a)) # replaced if we have proper elements
+		
+		# M = M0 + n * t
+		var M0 := wrapf(M - n * J2000_SEC, 0.0, TAU) # replaced if we have proper elements
+		
+		
+		# [a, e, i, Om, w, M0, n, M, mag, s, g, de]
+		_asteroid_elements.append(a) # au
+		_asteroid_elements.append(e) # e
+		_asteroid_elements.append(i) # i
+		_asteroid_elements.append(Om) # Om
+		_asteroid_elements.append(w) # w
+		_asteroid_elements.append(M0) # M0 provisional (replaced if proper elements)
+		_asteroid_elements.append(n) # n provisional (replaced if proper elements)
+		_asteroid_elements.append(M) # M, mean anomaly at *source file* epoch
 		_asteroid_elements.append(float(mag_str)) # magnitude
-		for _i in range(N_ELEMENTS - 8):
-			 _asteroid_elements.append(0.0) # will be s, g, L from propers
+		for _i in range(N_ELEMENTS - 9):
+			 _asteroid_elements.append(0.0) # will be s, g, de from propers
 		
 		line = read_file.get_line()
 		_index += 1

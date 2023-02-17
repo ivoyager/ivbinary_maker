@@ -30,12 +30,14 @@ var names := PoolStringArray()
 var iau_numbers := PoolIntArray() # DEPRECIATE
 var magnitudes := PoolRealArray()
 
-
+# WIP restructure
 var e_i_Om_w := PoolColorArray() # common (e librates for secular resonance)
 var a_M0_n := PoolVector3Array() # librating in l-point objects
 var s_g := PoolVector2Array() # orbit precessions
 var da_D_f := PoolVector3Array() # Trojans: a, L ampltude, and frequency
 var th0_de := PoolVector2Array() # libration angle at epoch [, e amplitude for sec res]
+# end WIP restructure
+
 
 var dummy_translations := PoolVector3Array() # all 0's
 
@@ -87,9 +89,9 @@ func set_trojan_data(name_: String, magnitude: float, keplerian_elements: Array,
 	iau_numbers[_index] = iau_number
 	magnitudes[_index] = magnitude
 	dummy_translations[_index] = Vector3(0.0, 0.0, 0.0)
-	d_e_i[_index] = Vector3(trojan_elements[0], keplerian_elements[1], keplerian_elements[2]) # d, e, i
-	Om_w_D_f[_index] = Color(keplerian_elements[3], keplerian_elements[4], trojan_elements[1], trojan_elements[2]) # Om, w, D, f
-	th0_de[_index] = Vector2(trojan_elements[3], 0.0) # th0_de
+	d_e_i[_index] = Vector3(trojan_elements[1], keplerian_elements[1], keplerian_elements[2]) # d, e, i
+	Om_w_D_f[_index] = Color(keplerian_elements[3], keplerian_elements[4], trojan_elements[2], trojan_elements[3]) # Om, w, D, f
+	th0_de[_index] = Vector2(trojan_elements[4], 0.0) # th0_de
 	_index += 1
 
 
