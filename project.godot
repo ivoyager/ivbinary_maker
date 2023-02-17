@@ -9,10 +9,20 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Reference",
+"class": "AsteroidsConverter",
+"language": "GDScript",
+"path": "res://ivbinary_maker/asteroids_converter.gd"
+}, {
 "base": "Control",
 "class": "GUI",
 "language": "GDScript",
 "path": "res://ivbinary_maker/gui.gd"
+}, {
+"base": "Reference",
+"class": "GroupProxy",
+"language": "GDScript",
+"path": "res://ivbinary_maker/group_proxy.gd"
 }, {
 "base": "VBoxContainer",
 "class": "IVAllHUDsGrids",
@@ -590,7 +600,9 @@ _global_script_classes=[ {
 "path": "res://ivoyager/initializers/shared_initializer.gd"
 } ]
 _global_script_class_icons={
+"AsteroidsConverter": "",
 "GUI": "",
+"GroupProxy": "",
 "IVAllHUDsGrids": "",
 "IVAssetInitializer": "",
 "IVAsteroidsGrid": "",
