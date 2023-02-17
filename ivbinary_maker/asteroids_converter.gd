@@ -241,8 +241,8 @@ func revise_trojans() -> void:
 		var g := deg2rad(float(line_array[6]) / 3600.0) / YEAR # "/yr -> rad/s
 		var proper_i := asin(float(line_array[7])) # sin(i) -> i
 		var s := deg2rad(float(line_array[8]) / 3600.0) / YEAR # "/yr -> rad/s
-		var l_point := float(line_array[9]) # "4" or "5" -> 4.0 or 5.0
-		assert(l_point == 4.0 or l_point == 5.0)
+		var lp_float := float(line_array[9]) # "4" or "5" -> 4.0 or 5.0
+		assert(lp_float == 4.0 or lp_float == 5.0)
 		
 		# [a, e, i, Om, w, M0, n, M, mag, s, g, de]
 		
@@ -257,7 +257,7 @@ func revise_trojans() -> void:
 		_asteroid_elements[index * N_ELEMENTS + 9] = s
 		_asteroid_elements[index * N_ELEMENTS + 10] = g
 		# Trojan data
-		_trojan_elements[index] = [l_point, da, D, f, th0]
+		_trojan_elements[index] = [lp_float, da, D, f, th0]
 		
 		revised += 1
 		if revised == status_index:
@@ -374,34 +374,25 @@ func make_binary_files() -> void:
 	
 	for file_group in index_dict:
 		var is_trojans: bool = trojan_file_groups.has(file_group)
-		group_proxy.is_trojans = is_trojans
 		for mag_str in index_dict[file_group]:
 			var indexes: Array = index_dict[file_group][mag_str]
 			var n_indexes := indexes.size()
 			if n_indexes == 0:
 				continue
 			group_proxy.clear_for_import()
-			group_proxy.expand_arrays(n_indexes)
+			group_proxy.expand_arrays(n_indexes, is_trojans)
 			for index in indexes:
 				var name_: String = _asteroid_names[index]
-				var keplerian_elements := []
-				keplerian_elements.resize(7)
-				var i := 0
+				var elements := []
+				elements.resize(N_ELEMENTS)
 				# [a, e, i, Om, w, M0, n, M, mag, s, g, de]
-				while i < 7: # first 7 are our canonical elements
-					keplerian_elements[i] = _asteroid_elements[index * N_ELEMENTS + i]
-					i += 1
-				var magnitude: float = _asteroid_elements[index * N_ELEMENTS + 8]
-				if not is_trojans:
-					group_proxy.set_data(name_, magnitude, keplerian_elements)
+				for i in N_ELEMENTS:
+					elements[i] = _asteroid_elements[index * N_ELEMENTS + i]
+				if is_trojans:
+					group_proxy.set_data(name_, elements, _trojan_elements[index])
 				else:
-#					var interm_trojan_elements: Array = _trojan_elements[index]
-#					var d: float = interm_trojan_elements[1]
-#					var D: float = interm_trojan_elements[2]
-#					var f: float = interm_trojan_elements[3]
-#					var th0: float = 0.0 # calculated on import
-#					var trojan_elements := [d, D, f, th0]
-					group_proxy.set_trojan_data(name_, magnitude, keplerian_elements, _trojan_elements[index])
+					group_proxy.set_data(name_, elements)
+
 		
 			var file_name := "%s.%s.%s" % [file_group, mag_str, BINARIES_EXTENSION]
 			_update_status(MAKE_BINARY_FILES,"%s (number indexes: %s)" % [file_name, n_indexes])
