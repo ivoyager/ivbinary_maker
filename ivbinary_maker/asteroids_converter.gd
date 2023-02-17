@@ -278,8 +278,8 @@ func make_binary_files() -> void:
 	# [<n_indexes>, <N_ELEMENTS>, <_asteroid_elements>, <_asteroid_names>,
 	# <trojan_elements or null>]
 	
-	var tot_indexes := _asteroid_names.size()
-	_update_status(MAKE_BINARY_FILES, "tot_indexes: %s" % tot_indexes)
+	var n_total := _asteroid_names.size()
+	_update_status(MAKE_BINARY_FILES, "n_total: %s" % n_total)
 	print("N_ELEMENTS: ", N_ELEMENTS)
 	var added := 0
 	
@@ -288,7 +288,7 @@ func make_binary_files() -> void:
 	var mags := []
 	for mag_str in BINARY_FILE_MAGNITUDES:
 		mags.append(float(mag_str))
-	var trojan_group := {}
+	var is_trojan_group := {}
 	var trojan_file_groups := []
 	
 	var n_groups := _table_reader.get_n_rows("asteroid_groups")
@@ -296,7 +296,7 @@ func make_binary_files() -> void:
 		var trojan_of := _table_reader.get_string("asteroid_groups", "trojan_of", row)
 		var is_trojans := bool(trojan_of)
 		var group := _table_reader.get_string("asteroid_groups", "group", row)
-		trojan_group[group] = is_trojans
+		is_trojan_group[group] = is_trojans
 		if not is_trojans:
 			index_dict[group] = {}
 			for mag_str in BINARY_FILE_MAGNITUDES:
@@ -311,47 +311,55 @@ func make_binary_files() -> void:
 			for mag_str in BINARY_FILE_MAGNITUDES:
 				index_dict[group + "5"][mag_str] = []
 
-	var all_criteria := {}
+	var group_definitions := {}
 	for row in n_groups:
 		var group := _table_reader.get_string("asteroid_groups", "group", row)
 		var min_q := _table_reader.get_real("asteroid_groups", "min_q", row)
 		var max_q := _table_reader.get_real("asteroid_groups", "max_q", row)
 		var min_a := _table_reader.get_real("asteroid_groups", "min_a", row)
 		var max_a := _table_reader.get_real("asteroid_groups", "max_a", row)
+		var max_e := _table_reader.get_real("asteroid_groups", "max_e", row)
+		var max_i := _table_reader.get_real("asteroid_groups", "max_i", row)
 		
 		
-		all_criteria[group] = {
+		group_definitions[group] = {
 			min_q = min_q if !is_nan(min_q) else 0.0,
 			max_q = max_q if !is_nan(max_q) else INF,
 			min_a = min_a if !is_nan(min_a) else 0.0,
 			max_a = max_a if !is_nan(max_a) else INF,
+			max_e = max_a if !is_nan(max_e) else INF,
+			max_i = max_a if !is_nan(max_i) else INF,
 		}
 	var status_index := STATUS_INTERVAL
-	for index in range(tot_indexes):
+	var index := 0
+	while index < n_total:
 		# [a, e, i, Om, w, M0, n, M, mag, s, g, de]
 		var a: float = _asteroid_elements[index * N_ELEMENTS]
 		var e: float = _asteroid_elements[index * N_ELEMENTS + 1]
 		var q: float = (1.0 - e) * a
+		var i: float = _asteroid_elements[index * N_ELEMENTS + 2]
 		var magnitude: float = _asteroid_elements[index * N_ELEMENTS + 8]
 		var mag_index := mags.bsearch(magnitude)
 		if mag_index >= BINARY_FILE_MAGNITUDES.size():
 			mag_index = BINARY_FILE_MAGNITUDES.size() - 1
 		var mag_str: String = BINARY_FILE_MAGNITUDES[mag_index]
-		for group in all_criteria:
-			var criteria = all_criteria[group]
-			if a <= criteria.min_a or a > criteria.max_a:
+		for group in group_definitions:
+			var def = group_definitions[group]
+			if a <= def.min_a or a > def.max_a:
 				continue
-			if q <= criteria.min_q or q > criteria.max_q:
+			if q <= def.min_q or q > def.max_q:
+				continue
+			if e > def.max_e:
+				continue
+			if i > def.max_i:
 				continue
 			var is_trojan: bool = _trojan_elements.has(index)
-			if is_trojan != trojan_group[group]:
+			if is_trojan != is_trojan_group[group]:
 				continue
-			# passes all criteria, so add index to a group
+			# passes all definitions, so add index to a group
 			if is_trojan:
 				var lp_str := str(_trojan_elements[index][0]) # "4" or "5"
-				
 				assert(lp_str == "4" or lp_str == "5")
-				
 				index_dict[group + lp_str][mag_str].append(index)
 			else:
 				index_dict[group][mag_str].append(index)
@@ -361,10 +369,11 @@ func make_binary_files() -> void:
 						% [added, group, mag_str])
 				status_index += STATUS_INTERVAL
 			break
+		index += 1
 	print("%s indexes added" % added)
-	if added != tot_indexes:
+	if added != n_total:
 		print("WARNING! %s added different than %s index number. Check data table criteria."
-				% [added, tot_indexes])
+				% [added, n_total])
 	
 	# Write binaries
 	print("Writing binaries to ", EXPORT_DIR)
@@ -381,13 +390,14 @@ func make_binary_files() -> void:
 				continue
 			group_proxy.clear_for_import()
 			group_proxy.expand_arrays(n_indexes, is_trojans)
-			for index in indexes:
+			for i in n_indexes:
+				index = indexes[i]
 				var name_: String = _asteroid_names[index]
 				var elements := []
 				elements.resize(N_ELEMENTS)
 				# [a, e, i, Om, w, M0, n, M, mag, s, g, de]
-				for i in N_ELEMENTS:
-					elements[i] = _asteroid_elements[index * N_ELEMENTS + i]
+				for j in N_ELEMENTS:
+					elements[j] = _asteroid_elements[index * N_ELEMENTS + j]
 				if is_trojans:
 					group_proxy.set_data(name_, elements, _trojan_elements[index])
 				else:
@@ -406,7 +416,7 @@ func make_binary_files() -> void:
 			binary.close()
 
 	_update_status(MAKE_BINARY_FILES, "%s asteroids written to binaries\n(of %s total)"
-			% [added, tot_indexes])
+			% [added, n_total])
 
 
 func start_over() -> void:
