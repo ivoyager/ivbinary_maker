@@ -1,6 +1,10 @@
 # ivbinary_maker
 
-Converts raw source data into *.ivbinary files for use in I, Voyager.
+Converts raw source data into binary or image files for use in I, Voyager.
+* Asteroids - Generates binaries usable for dev builds after 2023-02-18.
+* Comets - WIP
+* Rings - WIP. Make 1d texture for a Saturn rings shader!
+* Stars - PLANNED. Stars as shader vertecies.
 
 Download raw data files into folders described below:
 
