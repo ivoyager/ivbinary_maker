@@ -127,12 +127,14 @@ func revise_names() -> void:
 		astdys2_name = astdys2_name.strip_edges(false, true)
 		if astdys2_name == "-":
 			astdys2_name = ""
-		if astdys2_name == "": # get and format year-number astdys2_name, if any
-			astdys2_name = line.substr(25, 4) + line.substr(30, 6) # skip space conforms w/ AstDyS-2
-			if astdys2_name.substr(0, 1) == "-":
-				astdys2_name = ""
-			else:
-				astdys2_name = astdys2_name.strip_edges(false, true)
+		
+		# Do we want to add year-code if we have number?
+#		if astdys2_name == "": # get and format year-number astdys2_name, if any
+#			astdys2_name = line.substr(25, 4) + line.substr(30, 6) # skip space conforms w/ AstDyS-2
+#			if astdys2_name.substr(0, 1) == "-":
+#				astdys2_name = ""
+#			else:
+#				astdys2_name = astdys2_name.strip_edges(false, true)
 		if astdys2_name:
 			count += 1
 			astdys2_name = str(number) + " " + astdys2_name
@@ -343,6 +345,7 @@ func make_binary_files() -> void:
 		if mag_index >= BINARY_FILE_MAGNITUDES.size():
 			mag_index = BINARY_FILE_MAGNITUDES.size() - 1
 		var mag_str: String = BINARY_FILE_MAGNITUDES[mag_index]
+		# find the group that fits this asteroid
 		for group in group_definitions:
 			var def = group_definitions[group]
 			if a <= def.min_a or a > def.max_a:
@@ -353,7 +356,7 @@ func make_binary_files() -> void:
 				continue
 			if i > def.max_i:
 				continue
-			var is_trojan: bool = _trojan_elements.has(index)
+			var is_trojan: bool = _trojan_elements.has(index) # was in tro.syn
 			if is_trojan != is_trojan_group[group]:
 				continue
 			# passes all definitions, so add index to a group
