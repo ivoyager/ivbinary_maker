@@ -23,7 +23,7 @@
 
 
 const EXTENSION_NAME := "ivbinary_maker"
-const EXTENSION_VERSION := "0.0.1-DEV"
+const EXTENSION_VERSION := "0.1-DEV"
 const EXTENSION_VERSION_YMD := 20230219
 
 

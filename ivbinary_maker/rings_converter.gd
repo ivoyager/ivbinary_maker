@@ -20,6 +20,10 @@
 class_name RingsConverter
 extends Reference
 
+# Each source value (float) is encoded as a 32-bit Color. This is overkill, but
+# precission is good for value mulitiplication in the shader and the lossless
+# file is only 77kb.
+
 signal status(message)
 
 const SOURCE_PATH := "res://source_data/rings/"
@@ -31,11 +35,9 @@ const UNLITSIDE_FILE := "unlitside.txt"
 
 const EXPORT_PATH := "res://ivbinary_export/rings/saturn.rings.png"
 
+const BITS32MINUS1 := (1 << 32) - 1
 
 var _data := []
-
-var _data1 := []
-var _data2 := []
 
 
 func convert_data() -> void:
@@ -48,13 +50,17 @@ func test_image() -> void:
 	var texture: Texture = load(EXPORT_PATH)
 	var image := texture.get_data()
 	image.lock()
-	for i in range(3000, 4000):
-		prints(_data2[i] - image.get_pixel(i, 1))
-	print(texture)
-	emit_signal("status", "test")
+	var error_sum := 0.0
+	for i in 7:
+		for j in _data[0].size():
+			error_sum += abs(_data[i][j] - float(image.get_pixel(j, i).to_rgba32()) / BITS32MINUS1)
+	var feedback := "\nValues: %s\nSum of errors: %s" % [7 * _data[0].size(), error_sum]
+	print(feedback)
+	emit_signal("status", feedback)
 
 
 func _read_data() -> void:
+	_data = [[], [], [], [], [], [], []]
 	var file := File.new()
 	if file.open(SOURCE_PATH + COLOR_FILE, File.READ) != OK:
 		print("Failed to open file for read: ", SOURCE_PATH + COLOR_FILE)
@@ -62,46 +68,37 @@ func _read_data() -> void:
 	var line: String = file.get_line()
 	while line and !file.eof_reached():
 		var values := line.split_floats("\t", false)
-		var color := Color(values[0], values[1], values[2])
-		_data1.append(color)
+		_data[0].append(values[0])
+		_data[1].append(values[1])
+		_data[2].append(values[2])
 		line = file.get_line()
-		if !line:
-			break
-	var size := _data1.size()
-	var i := 0
-	file.open(SOURCE_PATH + TRANSPARENCY_FILE, File.READ)
-	line = file.get_line()
-	while line and !file.eof_reached():
-		var value := float(line)
-		_data1[i][3] = value
-		i += 1
-		line = file.get_line()
-	assert(i == size)
-	_data2.resize(size)
-	_data2.fill(Color())
-	var j := 0
-	for file_name in [BACKSCATTERED_FILE, FORWARDSCATTERED_FILE, UNLITSIDE_FILE]:
-		i = 0
-		file.open(SOURCE_PATH + file_name, File.READ)
+	var i := 3
+	for file_name in [TRANSPARENCY_FILE, BACKSCATTERED_FILE, FORWARDSCATTERED_FILE, UNLITSIDE_FILE]:
+		if file.open(SOURCE_PATH + file_name, File.READ) != OK:
+			print("Failed to open file for read: ", SOURCE_PATH + file_name)
+			return
 		line = file.get_line()
 		while line and !file.eof_reached():
-			var value := float(line)
-			_data2[i][j] = value
-			i += 1
+			_data[i].append(float(line))
 			line = file.get_line()
-		assert(i == size)
-		j += 1
-	
+		i += 1
+	var size: int = _data[0].size()
+	assert(size == _data[3].size())
+	assert(size == _data[4].size())
+	assert(size == _data[5].size())
+	assert(size == _data[6].size())
+
 
 func _export_image() -> void:
-	var size := _data1.size()
+	var size: int = _data[0].size()
 	var image := Image.new()
-	image.create(size, 2, false, Image.FORMAT_RGBA8)
+	image.create(size, 7, false, Image.FORMAT_RGBA8)
 	image.lock()
-	for i in size:
-		image.set_pixel(i, 0, _data1[i])
-		image.set_pixel(i, 1, _data2[i])
-
+	for i in 7:
+		for j in size:
+			var value: float = _data[i][j]
+			var int32 := int(round(value * BITS32MINUS1))
+			image.set_pixel(j, i, int32)
 	image.save_png(EXPORT_PATH)
 	
 	emit_signal("status", "Generated texture size: " + str(image.get_size()))

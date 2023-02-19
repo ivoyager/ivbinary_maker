@@ -21,9 +21,16 @@
 extends VBoxContainer
 
 var label_text := """
-Outputs a *.png texture.
-Change the base name and add to ivoyager_assets/rings/.
-IMPORTANT! Be sure to set 'No Compression' in the import tab!
+Generates a *.png texture that can be used by rings.shader.
+
+IMPORTANT! We don't want compression loss or other data changes! Select the
+export image in the editor and reimport with settings:
+
+Compress Mode: Lossless
+Everything else: Disabled or Off
+
+After that, the .png and .import files can be added to ivoyager_assets/rings/.
+
 """
 
 func _ready() -> void:
