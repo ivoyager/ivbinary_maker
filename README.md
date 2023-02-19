@@ -1,16 +1,17 @@
 # ivbinary_maker
 
 Converts raw source data into binary or image files for use in I, Voyager.
-* Asteroids - Generates binaries usable for dev builds after 2023-02-18.
-* Comets - WIP
-* Rings - WIP. Make 1d texture for a Saturn rings shader!
+* Asteroids - Generate binaries usable for dev builds after 2023-02-18.
+* Rings - Make a '1D' texture for a Saturn rings shader! (The shader is WIP.)
+* Comets - PLANNED.
 * Stars - PLANNED. Stars as shader vertecies.
 
 Download raw data files into folders described below:
 
 ## source_asteroids
 #### Required!
-Source: Asteroids - Dynamic Site, https://newton.spacedys.com/astdys/   
+These are large files so not Git-tracked.   
+Download from: Asteroids - Dynamic Site, https://newton.spacedys.com/astdys/   
 
 Proper elements:
 * all.syn	-	Numbered and multiopposition asteroids; the catalog contains the Main Belt and Hungaria asteroids.
@@ -36,19 +37,16 @@ http://newton.dm.unipi.it/neodys
 * neodys.ctc	- Equinoctial elements with covariance matrices
 * catalog.tot	- Proper elements and encounter conditions
 			
-
-
-
-## source_comets
-**Not implemented yet.**
-Source: https://minorplanetcenter.net/iau/Ephemerides/EphemOrbEls.html   
-File format: https://minorplanetcenter.net/iau/info/CometOrbitFormat.html
-
 ## source_rings
-**Not implemented yet.**
 Source: Björn Jónsson, https://bjj.mmedia.is/data/s_rings
 * backscattered.txt
 * forwardscattered.txt
 * unlitside.txt
 * transparency.txt
 * sat_rings_color.txt
+
+## source_comets
+**Not implemented yet.**
+Source: https://minorplanetcenter.net/iau/Ephemerides/EphemOrbEls.html   
+File format: https://minorplanetcenter.net/iau/info/CometOrbitFormat.html
+
