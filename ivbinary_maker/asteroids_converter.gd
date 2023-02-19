@@ -119,7 +119,7 @@ func revise_names() -> void:
 		return
 	var line: String = read_file.get_line()
 	var status_index := STATUS_INTERVAL
-	while not read_file.eof_reached():
+	while !read_file.eof_reached():
 		var number := int(line.substr(0, 6))
 		assert(number == index + 1)
 		assert(number == int(_asteroid_names[index]))

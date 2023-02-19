@@ -1,4 +1,4 @@
-# asteroids.gd
+# asteroids_gui.gd
 # This file is part of I, Voyager
 # https://ivoyager.dev
 # *****************************************************************************

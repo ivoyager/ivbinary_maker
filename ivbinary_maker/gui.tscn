@@ -1,8 +1,8 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://ivbinary_maker/gui.gd" type="Script" id=1]
 [ext_resource path="res://ivbinary_maker/asteroids_gui.tscn" type="PackedScene" id=2]
-
+[ext_resource path="res://ivbinary_maker/rings_gui.tscn" type="PackedScene" id=3]
 
 [node name="GUI" type="Control"]
 anchor_right = 1.0
@@ -33,6 +33,15 @@ margin_top = 32.0
 margin_right = -4.0
 margin_bottom = -4.0
 
+[node name="Rings" parent="PanelContainer/TabContainer" instance=ExtResource( 3 )]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+
 [node name="Comets" type="Label" parent="PanelContainer/TabContainer"]
 visible = false
 anchor_right = 1.0
@@ -42,9 +51,3 @@ margin_top = 32.0
 margin_right = -4.0
 margin_bottom = -4.0
 text = "No comets converter yet!"
-
-[node name="Rings" type="Label" parent="PanelContainer/TabContainer"]
-visible = false
-margin_right = 81.0
-margin_bottom = 14.0
-text = "No rings converter yet!"
