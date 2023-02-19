@@ -584,6 +584,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://ivoyager/tree_nodes/world_controller.gd"
 }, {
+"base": "Reference",
+"class": "RingsConverter",
+"language": "GDScript",
+"path": "res://ivbinary_maker/rings_converter.gd"
+}, {
 "base": "Object",
 "class": "SIBaseUnits",
 "language": "GDScript",
@@ -710,6 +715,7 @@ _global_script_class_icons={
 "IVWikiManager": "",
 "IVWindowManager": "",
 "IVWorldController": "",
+"RingsConverter": "",
 "SIBaseUnits": "",
 "SharedInitializer": ""
 }
