@@ -26,13 +26,16 @@ extends Reference
 
 signal status(message)
 
+# import
 const SOURCE_PATH := "res://source_data/rings/"
-const COLOR_FILE := "color.txt"
-const TRANSPARENCY_FILE := "transparency.txt"
 const BACKSCATTERED_FILE := "backscattered.txt"
 const FORWARDSCATTERED_FILE := "forwardscattered.txt"
 const UNLITSIDE_FILE := "unlitside.txt"
+const TRANSPARENCY_FILE := "transparency.txt"
+const COLOR_FILE := "color.txt"
+const FLIP_TRANSPARENCY := true
 
+# export
 const EXPORT_PATH := "res://ivbinary_export/rings/saturn.rings.png"
 
 const BITS32MINUS1 := (1 << 32) - 1
@@ -92,21 +95,27 @@ func _read_data() -> void:
 	var line: String = file.get_line()
 	while line and !file.eof_reached():
 		var values := line.split_floats("\t", false)
-		_data[0].append(values[0])
-		_data[1].append(values[1])
-		_data[2].append(values[2])
+		_data[4].append(values[0])
+		_data[5].append(values[1])
+		_data[6].append(values[2])
 		line = file.get_line()
-	var i := 3
-	for file_name in [TRANSPARENCY_FILE, BACKSCATTERED_FILE, FORWARDSCATTERED_FILE, UNLITSIDE_FILE]:
+	var i := 0
+	for file_name in [BACKSCATTERED_FILE, FORWARDSCATTERED_FILE, UNLITSIDE_FILE, TRANSPARENCY_FILE]:
 		if file.open(SOURCE_PATH + file_name, File.READ) != OK:
 			print("Failed to open file for read: ", SOURCE_PATH + file_name)
 			return
+		var flip_value: bool = FLIP_TRANSPARENCY and file_name == TRANSPARENCY_FILE
 		line = file.get_line()
 		while line and !file.eof_reached():
-			_data[i].append(float(line))
+			var value := float(line)
+			if flip_value:
+				value = 1.0 - value
+			_data[i].append(value)
 			line = file.get_line()
 		i += 1
 	var size: int = _data[0].size()
+	assert(size == _data[1].size())
+	assert(size == _data[2].size())
 	assert(size == _data[3].size())
 	assert(size == _data[4].size())
 	assert(size == _data[5].size())
@@ -114,6 +123,7 @@ func _read_data() -> void:
 
 
 func _export_image_8bit() -> void:
+	# I'd prefer 16-bit given the value multiplications in shader...
 	var size: int = _data[0].size()
 	var image := Image.new()
 	image.create(size, 2, false, Image.FORMAT_RGBA8)
@@ -128,6 +138,7 @@ func _export_image_8bit() -> void:
 
 
 func _export_image_32bit() -> void:
+	# NOT IMPLEMENTED.
 	# We would need usampler2D in the shader (which isn't supported in GLES2)
 	# or recode each float as four (8-bit) floats.
 	var size: int = _data[0].size()
