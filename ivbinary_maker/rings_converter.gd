@@ -42,10 +42,34 @@ var _data := []
 
 func convert_data() -> void:
 	_read_data()
-	_export_image()
+	_export_image_8bit()
 
 
-func test_image() -> void:
+func test_image_8bit() -> void:
+	_read_data()
+	var texture: Texture = load(EXPORT_PATH)
+	var image := texture.get_data()
+	image.lock()
+	var error := 0.0
+	for j in _data[0].size():
+		var color1 := image.get_pixel(j, 0)
+		var color2 := image.get_pixel(j, 1)
+		error += abs(_data[0][j] - color1[0])
+		error += abs(_data[1][j] - color1[1])
+		error += abs(_data[2][j] - color1[2])
+		error += abs(_data[3][j] - color1[3])
+		error += abs(_data[4][j] - color2[0])
+		error += abs(_data[5][j] - color2[1])
+		error += abs(_data[6][j] - color2[2])
+	error /= _data[0].size() * 7.0
+	error *= 100.0 # percent
+	
+	var feedback := "\nValues: %s\nAverage error: %s%%" % [7 * _data[0].size(), error]
+	print(feedback)
+	emit_signal("status", feedback)
+
+
+func test_image_32bit() -> void:
 	_read_data()
 	var texture: Texture = load(EXPORT_PATH)
 	var image := texture.get_data()
@@ -89,7 +113,23 @@ func _read_data() -> void:
 	assert(size == _data[6].size())
 
 
-func _export_image() -> void:
+func _export_image_8bit() -> void:
+	var size: int = _data[0].size()
+	var image := Image.new()
+	image.create(size, 2, false, Image.FORMAT_RGBA8)
+	image.lock()
+	for j in size:
+		var color1 := Color(_data[0][j], _data[1][j], _data[2][j], _data[3][j])
+		var color2 := Color(_data[4][j], _data[5][j], _data[6][j])
+		image.set_pixel(j, 0, color1)
+		image.set_pixel(j, 1, color2)
+	image.save_png(EXPORT_PATH)
+	emit_signal("status", "Generated texture size: " + str(image.get_size()))
+
+
+func _export_image_32bit() -> void:
+	# We would need usampler2D in the shader (which isn't supported in GLES2)
+	# or recode each float as four (8-bit) floats.
 	var size: int = _data[0].size()
 	var image := Image.new()
 	image.create(size, 7, false, Image.FORMAT_RGBA8)
@@ -100,7 +140,6 @@ func _export_image() -> void:
 			var int32 := int(round(value * BITS32MINUS1))
 			image.set_pixel(j, i, int32)
 	image.save_png(EXPORT_PATH)
-	
 	emit_signal("status", "Generated texture size: " + str(image.get_size()))
 	
 	
