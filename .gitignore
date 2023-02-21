@@ -10,5 +10,5 @@ source_data/asteroids/
 source_data/comets/
 ivbinary_export/asteroid_binaries/
 ivbinary_export/comets_binaries/
-ivbinary_export/rings/
+*.png
 

@@ -20,9 +20,7 @@
 class_name RingsConverter
 extends Reference
 
-# Each source value (float) is encoded as a 32-bit Color. This is overkill, but
-# precission is good for value mulitiplication in the shader and the lossless
-# file is only 77kb.
+# Data files from https://bjj.mmedia.is/data/s_rings/.
 
 signal status(message)
 
@@ -33,10 +31,11 @@ const FORWARDSCATTERED_FILE := "forwardscattered.txt"
 const UNLITSIDE_FILE := "unlitside.txt"
 const TRANSPARENCY_FILE := "transparency.txt"
 const COLOR_FILE := "color.txt"
-const FLIP_TRANSPARENCY := true
+const FLIP_TRANSPARENCY := true # set true if '1' means full transparency
 
 # export
 const EXPORT_PATH := "res://ivbinary_export/rings/saturn.rings.png"
+
 
 const BITS32MINUS1 := (1 << 32) - 1
 
