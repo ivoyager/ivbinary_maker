@@ -41,6 +41,8 @@ enum { # func_type
 const USE_THREAD := false # false for debug
 const REJECT_999 := false # reject mag "-9.99"; if false, accept but change to "99"
 const STATUS_INTERVAL := 20000
+const USE_TABLE_MAG_CUTOFF := true # if false, we can cull binaries manually
+const USE_TABLE_SKIP := true # if false, exports XJTX group that ivoyager can't use
 
 # read/write
 const SOURCE_PATH := "res://source_data/asteroids/"
@@ -323,6 +325,12 @@ func make_binary_files() -> void:
 			max_i = max_a if !is_nan(max_i) else INF,
 			lp_integer = lp_integer,
 		}
+		if USE_TABLE_MAG_CUTOFF:
+			group_definitions[sbg_alias].mag_cutoff = _table_reader.get_real(
+					"small_bodies_groups", "mag_cutoff", row)
+		if USE_TABLE_SKIP:
+			group_definitions[sbg_alias].skip = _table_reader.get_bool(
+					"small_bodies_groups", "skip", row)
 	
 	# add individual asteroid indexes to where they belong
 	var status_index := STATUS_INTERVAL
@@ -359,6 +367,12 @@ func make_binary_files() -> void:
 				if def.lp_integer != lp_integer:
 					continue
 			
+			# belongs in this group, but may be table skip or fail group's mag_cutoff
+			if USE_TABLE_SKIP and def.skip:
+				break
+			if USE_TABLE_MAG_CUTOFF and magnitude > def.mag_cutoff:
+				break
+			
 			# passes all definitions, so add index to this group
 			group_indexes_dict[sbg_alias][mag_str].append(index)
 			count += 1
@@ -367,6 +381,7 @@ func make_binary_files() -> void:
 						% [count, sbg_alias, mag_str])
 				status_index += STATUS_INTERVAL
 			break
+		
 		index += 1
 	print("%s indexes added" % count)
 	if count != n_total:
