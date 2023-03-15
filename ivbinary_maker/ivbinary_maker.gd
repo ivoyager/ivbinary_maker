@@ -17,43 +17,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # *****************************************************************************
+
+# We need only a few items from ivoyager, which are re-added here explicitly.
+# Some 'converters' also reference a few class script constants directly.
 #
-# We need only a few items from ivoyager, which are added here or used directly
-# in 'converter' classes.
+# Version 0.1 generates asteroid_binaries for ivoyager 0.0.14.
 
 
 const EXTENSION_NAME := "ivbinary_maker"
-const EXTENSION_VERSION := "0.1-DEV"
-const EXTENSION_VERSION_YMD := 20230219
+const EXTENSION_VERSION := "0.1"
+const EXTENSION_BUILD := ""
+const EXTENSION_STATE := "dev"
+const EXTENSION_YMD := 20230315
 
 
 func _extension_init() -> void:
-	prints(EXTENSION_NAME, EXTENSION_VERSION, EXTENSION_VERSION_YMD)
-
-	IVGlobal.connect("project_objects_instantiated", self, "_on_project_objects_instantiated")
+	print("%s %s%s-%s %s" % [EXTENSION_NAME, EXTENSION_VERSION, EXTENSION_BUILD, EXTENSION_STATE,
+			str(EXTENSION_YMD)])
 	
-	IVProjectBuilder.prog_builders.clear()
+	IVProjectBuilder.initializers.clear()
+	IVProjectBuilder.prog_refs.clear()
 	IVProjectBuilder.prog_nodes.clear()
+	IVProjectBuilder.gui_nodes.clear()
 	IVProjectBuilder.procedural_classes.clear()
 	
-	IVProjectBuilder.initializers = {
-		_TableImporter_ = IVTableImporter,
-	}
+	IVProjectBuilder.initializers._TableImporter_ = IVTableImporter
+	IVProjectBuilder.prog_refs._TableReader_ = IVTableReader
+	IVProjectBuilder.prog_refs._AsteroidsConverter_ = AsteroidsConverter
+	IVProjectBuilder.prog_refs._RingsConverter_ = RingsConverter
 	
-	IVProjectBuilder.prog_refs = {
-		_TableReader_ = IVTableReader,
-		_AsteroidsConverter_ = AsteroidsConverter,
-		_RingsConverter_ = RingsConverter,
-	}
-	
-	IVProjectBuilder.gui_nodes = {
-		_ProjectGUI_ = GUI,
-	}
-
-
-
-
-func _on_project_objects_instantiated() -> void:
-	pass
-
+	IVProjectBuilder.top_gui = IVFiles.make_object_or_scene(GUI)
 
