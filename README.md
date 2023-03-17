@@ -1,16 +1,17 @@
 # ivbinary_maker
 
-Converts raw source data into binary or image files for use in I, Voyager.
-* Asteroids - Generate binaries usable for dev builds after 2023-02-18.
+v0.1 exports data for ivoyager v0.0.14.
+
+Converts raw source data into binary or texture files for use in I, Voyager.
+* Asteroids - Generate asteroid binaries.
 * Rings - Make a '1D' texture for a Saturn rings shader! (The shader is WIP.)
 * Comets - PLANNED.
-* Stars - PLANNED. Stars as shader vertecies.
+* Stars - PLANNED. (Stars as shader vertecies!)
 
 Download raw data files into folders described below:
 
 ## source_asteroids
 #### Required!
-These are large files so not Git-tracked.   
 Download from: Asteroids - Dynamic Site, https://newton.spacedys.com/astdys/   
 
 Proper elements:
