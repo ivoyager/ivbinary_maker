@@ -1,10 +1,10 @@
 # ivbinary_maker
 
-v0.1 exports data for ivoyager v0.0.14.
+v0.1 exports for ivoyager v0.0.14.
 
-Converts raw source data into binary or texture files for use in I, Voyager.
+Converts raw source data into binary and texture files for use in I, Voyager.
 * Asteroids - Generate asteroid binaries.
-* Rings - Make a '1D' texture for a Saturn rings shader! (The shader is WIP.)
+* Rings - Make a '1-spatial-dimension' texture sampler for rings.shader!
 * Comets - PLANNED.
 * Stars - PLANNED. (Stars as shader vertecies!)
 
@@ -12,7 +12,7 @@ Download raw data files into folders described below:
 
 ## source_asteroids
 #### Required!
-Download from: Asteroids - Dynamic Site, https://newton.spacedys.com/astdys/   
+Download from: https://newton.spacedys.com/astdys/ (Asteroids - Dynamic Site)   
 
 Proper elements:
 * all.syn	-	Numbered and multiopposition asteroids; the catalog contains the Main Belt and Hungaria asteroids.
@@ -24,7 +24,7 @@ Osculating elements:
 * allnum.cat	- Numbered asteroids orbital elements, one line format, epoch near present time.
 * ufitobs.cat	- Multiopposition asteroids orbital elements, one line format, epoch near present time.
 
-https://sbn.psi.edu/pds/resource/discover.html
+Download from: https://sbn.psi.edu/pds/resource/discover.html
 * discover.tab	- Has name and discoverer for numbered asteroids as of 2008. File from EAR-A-5-DDR-ASTNAMES-DISCOVERY-V12.0/data.
 
 #### Not used (yet)
@@ -47,7 +47,7 @@ Source: Björn Jónsson, https://bjj.mmedia.is/data/s_rings
 * sat_rings_color.txt
 
 ## source_comets
-**Not implemented yet.**
+**Not implemented yet.**    
 Source: https://minorplanetcenter.net/iau/Ephemerides/EphemOrbEls.html   
 File format: https://minorplanetcenter.net/iau/info/CometOrbitFormat.html
 
