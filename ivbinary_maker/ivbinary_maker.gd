@@ -18,16 +18,13 @@
 # limitations under the License.
 # *****************************************************************************
 
-# We need only a few items from ivoyager, which are re-added here explicitly.
-# Some 'converters' also reference a few class script constants directly.
-#
-# Version 0.1 generates asteroid_binaries for ivoyager 0.0.14.
+# v0.1 exports data for ivoyager v0.0.14.
 
 
 const EXTENSION_NAME := "ivbinary_maker"
 const EXTENSION_VERSION := "0.1"
 const EXTENSION_BUILD := ""
-const EXTENSION_STATE := "dev"
+const EXTENSION_STATE := ""
 const EXTENSION_YMD := 20230315
 
 
@@ -35,16 +32,19 @@ func _extension_init() -> void:
 	print("%s %s%s-%s %s" % [EXTENSION_NAME, EXTENSION_VERSION, EXTENSION_BUILD, EXTENSION_STATE,
 			str(EXTENSION_YMD)])
 	
+	# Clear everything and add what we need.
 	IVProjectBuilder.initializers.clear()
 	IVProjectBuilder.prog_refs.clear()
 	IVProjectBuilder.prog_nodes.clear()
 	IVProjectBuilder.gui_nodes.clear()
 	IVProjectBuilder.procedural_classes.clear()
 	
+	# ivoyager
 	IVProjectBuilder.initializers._TableImporter_ = IVTableImporter
 	IVProjectBuilder.prog_refs._TableReader_ = IVTableReader
+	
+	# ivbinary_maker
 	IVProjectBuilder.prog_refs._AsteroidsConverter_ = AsteroidsConverter
 	IVProjectBuilder.prog_refs._RingsConverter_ = RingsConverter
-	
 	IVProjectBuilder.top_gui = IVFiles.make_object_or_scene(GUI)
 
