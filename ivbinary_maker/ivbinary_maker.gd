@@ -18,14 +18,15 @@
 # limitations under the License.
 # *****************************************************************************
 
-# v0.1 exports data for ivoyager v0.0.14.
+# v0.1 exports data for ivoyager v0.0.14 - 15 (Godot 3.x).
+# v0.2 exports data for ivoyager v0.0.16 - (Godot 4.x).
 
 
 const EXTENSION_NAME := "ivbinary_maker"
-const EXTENSION_VERSION := "0.1"
+const EXTENSION_VERSION := "0.2"
 const EXTENSION_BUILD := ""
-const EXTENSION_STATE := ""
-const EXTENSION_YMD := 20230315
+const EXTENSION_STATE := "dev"
+const EXTENSION_YMD := 20230811
 
 
 func _extension_init() -> void:
@@ -34,17 +35,17 @@ func _extension_init() -> void:
 	
 	# Clear everything and add what we need.
 	IVProjectBuilder.initializers.clear()
-	IVProjectBuilder.prog_refs.clear()
-	IVProjectBuilder.prog_nodes.clear()
+	IVProjectBuilder.program_refcounteds.clear()
+	IVProjectBuilder.program_nodes.clear()
 	IVProjectBuilder.gui_nodes.clear()
 	IVProjectBuilder.procedural_classes.clear()
 	
 	# ivoyager
 	IVProjectBuilder.initializers._TableImporter_ = IVTableImporter
-	IVProjectBuilder.prog_refs._TableReader_ = IVTableReader
+	IVProjectBuilder.program_refcounteds._TableReader_ = IVTableReader
 	
 	# ivbinary_maker
-	IVProjectBuilder.prog_refs._AsteroidsConverter_ = AsteroidsConverter
-	IVProjectBuilder.prog_refs._RingsConverter_ = RingsConverter
+	IVProjectBuilder.program_refcounteds._AsteroidsConverter_ = AsteroidsConverter
+	IVProjectBuilder.program_refcounteds._RingsConverter_ = RingsConverter
 	IVProjectBuilder.top_gui = IVFiles.make_object_or_scene(GUI)
 

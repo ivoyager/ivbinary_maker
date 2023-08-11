@@ -17,7 +17,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # *****************************************************************************
-
 extends VBoxContainer
 
 var label_text := """
@@ -34,13 +33,13 @@ After that, the .png and .import files can be added to ivoyager_assets/rings/.
 """
 
 func _ready() -> void:
-	$Label.text = label_text
+	($Label as Label).text = label_text
 	var rings_converter: RingsConverter = IVGlobal.program.RingsConverter
-	$"%Convert".connect("pressed", Callable(rings_converter, "convert_data"))
-	$"%Test".connect("pressed", Callable(rings_converter, "test_image_8bit"))
-	rings_converter.connect("status", Callable($Feedback, "set_text"))
+	($"%Convert" as Button).pressed.connect(rings_converter.convert_data)
+	($"%Test" as Button).pressed.connect(rings_converter.test_image_8bit)
+	rings_converter.status.connect(($Feedback as Label).set_text)
 
 
 func _on_message(message: String) -> void:
-	$Feedback.text = message
-	
+	($Feedback as Label).text = message
+

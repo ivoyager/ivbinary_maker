@@ -38,9 +38,9 @@ var th0_de := PackedVector2Array() # Trojans: libration at epoch [, & sec res: e
 # *****************************************************************************
 
 var _index := 0
-var _maxes := [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-var _mins := [INF, INF, INF, INF, INF, INF, INF, INF, INF]
-var _load_count := 0
+#var _maxes := [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+#var _mins := [INF, INF, INF, INF, INF, INF, INF, INF, INF]
+#var _load_count := 0
 
 
 func expand_arrays(n: int, is_trojans: bool) -> void:
@@ -89,7 +89,7 @@ func set_data(name: String, elements: Array, trojan_elements := []) -> void:
 
 
 
-func write_binary(binary: File) -> void:
+func write_binary(binary: FileAccess) -> void:
 	var binary_data := [names, magnitudes, e_i_Om_w, a_M0_n, s_g, da_D_f, th0_de]
 	binary.store_var(binary_data)
 
@@ -103,6 +103,4 @@ func clear_for_import() -> void:
 	da_D_f.resize(0)
 	th0_de.resize(0)
 	_index = 0
-
-
 

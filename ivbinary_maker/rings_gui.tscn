@@ -1,39 +1,30 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=2 format=3 uid="uid://d2ccwlq7txkng"]
 
-[ext_resource path="res://ivbinary_maker/rings_gui.gd" type="Script" id=1]
+[ext_resource type="Script" path="res://ivbinary_maker/rings_gui.gd" id="1"]
 
 [node name="Rings" type="VBoxContainer"]
 offset_right = 40.0
 offset_bottom = 40.0
 theme_override_constants/separation = 50
-script = ExtResource( 1 )
+script = ExtResource("1")
 
 [node name="Label" type="Label" parent="."]
-offset_right = 219.0
-offset_bottom = 14.0
+layout_mode = 2
 
 [node name="HBox" type="HBoxContainer" parent="."]
-offset_top = 64.0
-offset_right = 219.0
-offset_bottom = 84.0
+layout_mode = 2
 
 [node name="Convert" type="Button" parent="HBox"]
 unique_name_in_owner = true
-offset_right = 132.0
-offset_bottom = 20.0
+layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 text = "Convert Rings Data"
 
 [node name="Test" type="Button" parent="HBox"]
 unique_name_in_owner = true
-offset_left = 136.0
-offset_right = 219.0
-offset_bottom = 20.0
+layout_mode = 2
 text = "Test Image"
 
 [node name="Feedback" type="Label" parent="."]
-offset_top = 134.0
-offset_right = 219.0
-offset_bottom = 148.0
-valign = 2
+layout_mode = 2
