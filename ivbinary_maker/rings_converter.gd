@@ -18,7 +18,7 @@
 # limitations under the License.
 # *****************************************************************************
 class_name RingsConverter
-extends Reference
+extends RefCounted
 
 # Data files from https://bjj.mmedia.is/data/s_rings/.
 
@@ -49,9 +49,9 @@ func convert_data() -> void:
 
 func test_image_8bit() -> void:
 	_read_data()
-	var texture: Texture = load(EXPORT_PATH)
+	var texture: Texture2D = load(EXPORT_PATH)
 	var image := texture.get_data()
-	image.lock()
+	false # image.lock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
 	var error := 0.0
 	for j in _data[0].size():
 		var color1 := image.get_pixel(j, 0)
@@ -73,9 +73,9 @@ func test_image_8bit() -> void:
 
 func test_image_32bit() -> void:
 	_read_data()
-	var texture: Texture = load(EXPORT_PATH)
+	var texture: Texture2D = load(EXPORT_PATH)
 	var image := texture.get_data()
-	image.lock()
+	false # image.lock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
 	var error_sum := 0.0
 	for i in 7:
 		for j in _data[0].size():
@@ -126,7 +126,7 @@ func _export_image_8bit() -> void:
 	var size: int = _data[0].size()
 	var image := Image.new()
 	image.create(size, 2, false, Image.FORMAT_RGBA8)
-	image.lock()
+	false # image.lock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
 	for j in size:
 		var color1 := Color(_data[0][j], _data[1][j], _data[2][j], _data[3][j])
 		var color2 := Color(_data[4][j], _data[5][j], _data[6][j])
@@ -143,7 +143,7 @@ func _export_image_32bit() -> void:
 	var size: int = _data[0].size()
 	var image := Image.new()
 	image.create(size, 7, false, Image.FORMAT_RGBA8)
-	image.lock()
+	false # image.lock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
 	for i in 7:
 		for j in size:
 			var value: float = _data[i][j]

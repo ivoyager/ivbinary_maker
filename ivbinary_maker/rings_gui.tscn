@@ -3,37 +3,37 @@
 [ext_resource path="res://ivbinary_maker/rings_gui.gd" type="Script" id=1]
 
 [node name="Rings" type="VBoxContainer"]
-margin_right = 40.0
-margin_bottom = 40.0
-custom_constants/separation = 50
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/separation = 50
 script = ExtResource( 1 )
 
 [node name="Label" type="Label" parent="."]
-margin_right = 219.0
-margin_bottom = 14.0
+offset_right = 219.0
+offset_bottom = 14.0
 
 [node name="HBox" type="HBoxContainer" parent="."]
-margin_top = 64.0
-margin_right = 219.0
-margin_bottom = 84.0
+offset_top = 64.0
+offset_right = 219.0
+offset_bottom = 84.0
 
 [node name="Convert" type="Button" parent="HBox"]
 unique_name_in_owner = true
-margin_right = 132.0
-margin_bottom = 20.0
+offset_right = 132.0
+offset_bottom = 20.0
 size_flags_horizontal = 0
 size_flags_vertical = 0
 text = "Convert Rings Data"
 
 [node name="Test" type="Button" parent="HBox"]
 unique_name_in_owner = true
-margin_left = 136.0
-margin_right = 219.0
-margin_bottom = 20.0
+offset_left = 136.0
+offset_right = 219.0
+offset_bottom = 20.0
 text = "Test Image"
 
 [node name="Feedback" type="Label" parent="."]
-margin_top = 134.0
-margin_right = 219.0
-margin_bottom = 148.0
+offset_top = 134.0
+offset_right = 219.0
+offset_bottom = 148.0
 valign = 2

@@ -3,7 +3,7 @@
 [ext_resource path="res://ivbinary_maker/asteroids_gui.gd" type="Script" id=1]
 
 [node name="Asteroids" type="GridContainer"]
-margin_right = 40.0
-margin_bottom = 40.0
+offset_right = 40.0
+offset_bottom = 40.0
 columns = 3
 script = ExtResource( 1 )

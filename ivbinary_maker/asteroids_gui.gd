@@ -54,26 +54,26 @@ const DESCRIPTIONS := [
 
 var _status_labels := []
 
-onready var _asteroids_converter: AsteroidsConverter = IVGlobal.program.AsteroidsConverter
+@onready var _asteroids_converter: AsteroidsConverter = IVGlobal.program.AsteroidsConverter
 
 func _ready() -> void:
-	_asteroids_converter.connect("status", self, "_on_status")
+	_asteroids_converter.connect("status", Callable(self, "_on_status"))
 	
 	var func_type := 0
 	while func_type < METHODS.size():
 		var item_button := Button.new()
-		item_button.connect("pressed", self, "_run_function", [func_type])
+		item_button.connect("pressed", Callable(self, "_run_function").bind(func_type))
 		item_button.text = TEXTS[func_type]
 		add_child(item_button)
 		var item_label := Label.new()
 		item_label.text = DESCRIPTIONS[func_type]
-		item_label.rect_min_size = Vector2(400, 50)
-		item_label.valign = Label.ALIGN_CENTER
+		item_label.custom_minimum_size = Vector2(400, 50)
+		item_label.valign = Label.ALIGNMENT_CENTER
 		item_label.autowrap = true
 		add_child(item_label)
 		var status_label := Label.new()
-		status_label.rect_min_size = Vector2(100, 50)
-		status_label.valign = Label.ALIGN_CENTER
+		status_label.custom_minimum_size = Vector2(100, 50)
+		status_label.valign = Label.ALIGNMENT_CENTER
 		status_label.size_flags_horizontal = SIZE_EXPAND_FILL
 		_status_labels.append(status_label)
 		add_child(status_label)
