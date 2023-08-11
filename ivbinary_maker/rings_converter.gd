@@ -39,7 +39,7 @@ const EXPORT_PATH := "res://ivbinary_export/rings/saturn.rings.png"
 
 const BITS32MINUS1 := (1 << 32) - 1
 
-var _data := []
+var _data: Array[Array] = []
 
 
 func convert_data() -> void:

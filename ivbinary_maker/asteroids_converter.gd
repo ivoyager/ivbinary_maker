@@ -91,7 +91,7 @@ func _project_init() -> void:
 
 func call_method(method: String) -> void:
 	if USE_THREAD:
-		if _thread.is_active():
+		if _thread.is_alive():
 			_thread.wait_to_finish()
 		_thread.start(Callable(self, "_run_in_thread").bind(method))
 	else:
@@ -374,7 +374,8 @@ func make_binary_files() -> void:
 				break
 			
 			# passes all definitions, so add index to this group
-			group_indexes_dict[sbg_alias][mag_str].append(index)
+			var group_indexes: Array = group_indexes_dict[sbg_alias][mag_str]
+			group_indexes.append(index)
 			count += 1
 			if count == status_index:
 				_update_status(MAKE_BINARY_FILES, "%s indexes added (current prefix: %s.%s)"
