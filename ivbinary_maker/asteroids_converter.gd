@@ -70,7 +70,7 @@ const BINARY_FILE_MAGNITUDES := IVSBGBuilder.BINARY_FILE_MAGNITUDES
 const SBG_CLASS_ASTEROIDS := IVEnums.SBGClass.SBG_CLASS_ASTEROIDS
 
 
-var _tables: Dictionary = IVGlobal.tables
+#var _tables: Dictionary = IVGlobal.tables
 var _table_reader: IVTableReader
 var _thread: Thread
 
@@ -116,8 +116,8 @@ func revise_names() -> void:
 	var index := 0
 	var count := 0
 	var path := SOURCE_PATH + ASTEROID_NAMES_FILE
-	var read_file = File.new()
-	if read_file.open(path, File.READ) != OK:
+	var read_file := FileAccess.open(path, FileAccess.READ)
+	if !read_file:
 		_update_status(REVISE_NAMES, "Could not open " + path)
 		return
 	var line: String = read_file.get_line()
@@ -161,8 +161,8 @@ func revise_proper() -> void:
 		var is_sec_res: bool = file_name == SECULAR_RESONANT_FILE
 		print("is_sec_res ", is_sec_res)
 		var path: String = SOURCE_PATH + file_name
-		var read_file := File.new()
-		if read_file.open(path, File.READ) != OK:
+		var read_file := FileAccess.open(path, FileAccess.READ)
+		if !read_file:
 			_update_status(REVISE_PROPER, "Could not open " + path)
 			continue
 		var line := read_file.get_line()
@@ -218,8 +218,8 @@ func revise_trojans() -> void:
 	var n_not_found := 0
 	var status_index := STATUS_INTERVAL
 	var path := SOURCE_PATH + TROJAN_PROPER_ELEMENTS_FILE
-	var read_file := File.new()
-	if read_file.open(path, File.READ) != OK:
+	var read_file := FileAccess.open(path, FileAccess.READ)
+	if !read_file:
 #		print("Could not open ", path)
 		_update_status(REVISE_TROJANS, "Could not open " + path)
 		return
@@ -417,8 +417,8 @@ func make_binary_files() -> void:
 			var file_name := "%s.%s.%s" % [sbg_alias, mag_str, BINARIES_EXTENSION]
 			_update_status(MAKE_BINARY_FILES,"%s (number indexes: %s)" % [file_name, n_indexes])
 			var path := EXPORT_DIR + "/" + file_name
-			var binary := File.new()
-			if binary.open(path, File.WRITE) != OK:
+			var binary := FileAccess.open(path, FileAccess.WRITE)
+			if !binary:
 #				print("Could not write ", path)
 				_update_status(MAKE_BINARY_FILES,"Could not write " + path)
 				return
@@ -446,8 +446,8 @@ func _read_astdys_cat_file(data_file: String, func_type: int) -> void:
 	# 7 elements of keplerian_elements, magnitude (after propers: s, g, L)
 	# for each asteroid.
 	var path := SOURCE_PATH + data_file
-	var read_file := File.new()
-	if read_file.open(path, File.READ) != OK:
+	var read_file := FileAccess.open(path, FileAccess.READ)
+	if !read_file:
 #		print("Could not open ", path)
 		_update_status(func_type, "Could not open " + path)
 		return
@@ -485,7 +485,6 @@ func _read_astdys_cat_file(data_file: String, func_type: int) -> void:
 		# M = M0 + n * t
 		var M0 := wrapf(M - n * J2000_SEC, 0.0, TAU) # replaced if we have proper elements
 		
-		
 		# [a, e, i, Om, w, M0, n, M, mag, s, g, de]
 		_asteroid_elements.append(a) # au
 		_asteroid_elements.append(e) # e
@@ -497,7 +496,7 @@ func _read_astdys_cat_file(data_file: String, func_type: int) -> void:
 		_asteroid_elements.append(M) # M, mean anomaly at *source file* epoch
 		_asteroid_elements.append(float(mag_str)) # magnitude
 		for _i in range(N_ELEMENTS - 9):
-			 _asteroid_elements.append(0.0) # will be s, g, de from propers
+			_asteroid_elements.append(0.0) # will be s, g, de from propers
 		
 		line = read_file.get_line()
 		_index += 1
@@ -505,16 +504,12 @@ func _read_astdys_cat_file(data_file: String, func_type: int) -> void:
 			_update_status(func_type, str(_index) + " total asteroids (current: "
 					+ astdys2_name + ")")
 			status_index += STATUS_INTERVAL
-			
 		
 	read_file.close()
 	_update_status(func_type, str(_index) + " total asteroids")
-	
 
 
 func _update_status(func_type: int, message: String) -> void:
 	call_deferred("emit_signal", "status", func_type, message)
 	print(message)
-	
-
 
