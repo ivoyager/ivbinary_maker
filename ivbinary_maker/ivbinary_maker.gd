@@ -38,14 +38,10 @@ func _extension_init() -> void:
 	IVProjectBuilder.program_refcounteds.clear()
 	IVProjectBuilder.program_nodes.clear()
 	IVProjectBuilder.gui_nodes.clear()
-	IVProjectBuilder.procedural_classes.clear()
-	
-	# ivoyager
-	IVProjectBuilder.initializers._TableImporter_ = IVTableImporter
-	IVProjectBuilder.program_refcounteds._TableReader_ = IVTableReader
+	IVProjectBuilder.procedural_objects.clear()
 	
 	# ivbinary_maker
-	IVProjectBuilder.program_refcounteds._AsteroidsConverter_ = AsteroidsConverter
-	IVProjectBuilder.program_refcounteds._RingsConverter_ = RingsConverter
+	IVProjectBuilder.program_refcounteds[&"_AsteroidsConverter_"] = AsteroidsConverter
+	IVProjectBuilder.program_refcounteds[&"_RingsConverter_"] = RingsConverter
 	IVProjectBuilder.top_gui = IVFiles.make_object_or_scene(GUI)
 

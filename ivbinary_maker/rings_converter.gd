@@ -82,7 +82,7 @@ func test_image_32bit() -> void:
 			error_sum += abs(_data[i][j] - float(image.get_pixel(j, i).to_rgba32()) / BITS32MINUS1)
 	var feedback := "\nValues: %s\nSum of errors: %s" % [7 * _data[0].size(), error_sum]
 	print(feedback)
-	emit_signal("status", feedback)
+	status.emit(feedback)
 
 
 func _read_data() -> void:
@@ -134,7 +134,7 @@ func _export_image_8bit() -> void:
 		image.set_pixel(j, 0, color1)
 		image.set_pixel(j, 1, color2)
 	image.save_png(EXPORT_PATH)
-	emit_signal("status", "Generated texture size: " + str(image.get_size()))
+	status.emit("Generated texture size: " + str(image.get_size()))
 
 
 func _export_image_32bit() -> void:
@@ -151,5 +151,5 @@ func _export_image_32bit() -> void:
 			var int32 := int(round(value * BITS32MINUS1))
 			image.set_pixel(j, i, int32)
 	image.save_png(EXPORT_PATH)
-	emit_signal("status", "Generated texture size: " + str(image.get_size()))
+	status.emit("Generated texture size: " + str(image.get_size()))
 

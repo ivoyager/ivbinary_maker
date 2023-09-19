@@ -70,8 +70,6 @@ const BINARY_FILE_MAGNITUDES := IVSBGBuilder.BINARY_FILE_MAGNITUDES
 const SBG_CLASS_ASTEROIDS := IVEnums.SBGClass.SBG_CLASS_ASTEROIDS
 
 
-#var _tables: Dictionary = IVGlobal.tables
-var _table_reader: IVTableReader
 var _thread: Thread
 
 # current processing
@@ -84,7 +82,6 @@ var _index := 0
 
 
 func _project_init() -> void:
-	_table_reader = IVGlobal.program.TableReader
 	if USE_THREAD:
 		_thread = Thread.new()
 
@@ -93,7 +90,7 @@ func call_method(method: String) -> void:
 	if USE_THREAD:
 		if _thread.is_alive():
 			_thread.wait_to_finish()
-		_thread.start(Callable(self, "_run_in_thread").bind(method))
+		_thread.start(_run_in_thread.bind(method))
 	else:
 		call(method)
 	
@@ -294,12 +291,12 @@ func make_binary_files() -> void:
 	var is_trojan_group := {}
 	
 	var group_definitions := {}
-	var n_groups := _table_reader.get_n_rows("small_bodies_groups")
+	var n_groups := IVTableData.get_n_rows("small_bodies_groups")
 	for row in n_groups:
-		if _table_reader.get_int("small_bodies_groups", "sbg_class", row) != SBG_CLASS_ASTEROIDS:
+		if IVTableData.get_db_int("small_bodies_groups", "sbg_class", row) != SBG_CLASS_ASTEROIDS:
 			continue
-		var sbg_alias := _table_reader.get_string("small_bodies_groups", "sbg_alias", row)
-		var lp_integer := _table_reader.get_int("small_bodies_groups", "lp_integer", row)
+		var sbg_alias := IVTableData.get_db_string_name("small_bodies_groups", "sbg_alias", row)
+		var lp_integer := IVTableData.get_db_int("small_bodies_groups", "lp_integer", row)
 		assert(lp_integer == -1 or lp_integer == 4 or lp_integer == 5)
 		var is_trojans := lp_integer != -1
 		is_trojan_group[sbg_alias] = is_trojans
@@ -310,12 +307,12 @@ func make_binary_files() -> void:
 			group_indexes_dict[sbg_alias][mag_str] = []
 		
 		# create group definintions for placing individual asteroids
-		var min_q := _table_reader.get_real("small_bodies_groups", "min_q", row)
-		var max_q := _table_reader.get_real("small_bodies_groups", "max_q", row)
-		var min_a := _table_reader.get_real("small_bodies_groups", "min_a", row)
-		var max_a := _table_reader.get_real("small_bodies_groups", "max_a", row)
-		var max_e := _table_reader.get_real("small_bodies_groups", "max_e", row)
-		var max_i := _table_reader.get_real("small_bodies_groups", "max_i", row)
+		var min_q := IVTableData.get_db_float("small_bodies_groups", "min_q", row)
+		var max_q := IVTableData.get_db_float("small_bodies_groups", "max_q", row)
+		var min_a := IVTableData.get_db_float("small_bodies_groups", "min_a", row)
+		var max_a := IVTableData.get_db_float("small_bodies_groups", "max_a", row)
+		var max_e := IVTableData.get_db_float("small_bodies_groups", "max_e", row)
+		var max_i := IVTableData.get_db_float("small_bodies_groups", "max_i", row)
 		group_definitions[sbg_alias] = {
 			min_q = min_q if !is_nan(min_q) else 0.0,
 			max_q = max_q if !is_nan(max_q) else INF,
@@ -326,10 +323,10 @@ func make_binary_files() -> void:
 			lp_integer = lp_integer,
 		}
 		if USE_TABLE_MAG_CUTOFF:
-			group_definitions[sbg_alias].mag_cutoff = _table_reader.get_real(
+			group_definitions[sbg_alias].mag_cutoff = IVTableData.get_db_float(
 					"small_bodies_groups", "mag_cutoff", row)
 		if USE_TABLE_SKIP:
-			group_definitions[sbg_alias].skip = _table_reader.get_bool(
+			group_definitions[sbg_alias].skip = IVTableData.get_db_bool(
 					"small_bodies_groups", "skip", row)
 	
 	# add individual asteroid indexes to where they belong
