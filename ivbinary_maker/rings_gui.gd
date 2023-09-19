@@ -36,7 +36,6 @@ func _ready() -> void:
 	($Label as Label).text = label_text
 	var rings_converter: RingsConverter = IVGlobal.program.RingsConverter
 	($"%Convert" as Button).pressed.connect(rings_converter.convert_data)
-	($"%Test" as Button).pressed.connect(rings_converter.test_image_8bit)
 	rings_converter.status.connect(($Feedback as Label).set_text)
 
 
