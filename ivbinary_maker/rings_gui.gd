@@ -22,11 +22,13 @@ extends VBoxContainer
 var label_text := """
 Generates a *.png texture that can be used by rings.gdshader.
 
-IMPORTANT! We don't want compression loss or other data changes! Select the
-@export image in the editor and reimport with settings:
+IMPORTANT! We need mipmaps but not any compression loss or other data changes!
 
-Compress Mode: Lossless
-Everything else: Disabled or Off
+Import settings should be:
+
+  * Compress Mode: Lossless
+  * Mipmaps Generate: On
+  * Everything else: Disabled or Off
 
 After that, the .png and .import files can be added to ivoyager_assets/rings/.
 
@@ -36,10 +38,10 @@ func _ready() -> void:
 	($Label as Label).text = label_text
 	var rings_converter: RingsConverter = IVGlobal.program.RingsConverter
 	($"%Convert" as Button).pressed.connect(rings_converter.convert_data)
-	($"%Test" as Button).pressed.connect(rings_converter.test_image_8bit)
-	rings_converter.status.connect(($Feedback as Label).set_text)
+	rings_converter.status.connect(_on_message)
 
 
 func _on_message(message: String) -> void:
 	($Feedback as Label).text = message
+	print(message)
 
