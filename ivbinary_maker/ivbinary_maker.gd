@@ -26,7 +26,7 @@ const EXTENSION_NAME := "ivbinary_maker"
 const EXTENSION_VERSION := "0.2"
 const EXTENSION_BUILD := ""
 const EXTENSION_STATE := "dev"
-const EXTENSION_YMD := 20230919
+const EXTENSION_YMD := 20230922
 
 
 func _extension_init() -> void:
