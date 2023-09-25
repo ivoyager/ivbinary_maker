@@ -1,6 +1,6 @@
 # ivbinary_maker
 
-v0.1 exports for ivoyager v0.0.14.
+v0.2 exports for ivoyager v0.0.16.
 
 Converts raw source data into binary and texture files for use in I, Voyager.
 * Asteroids - Generate asteroid binaries.

@@ -18,8 +18,8 @@
 # limitations under the License.
 # *****************************************************************************
 
-# v0.1 exports data for ivoyager v0.0.14 - 15 (Godot 3.x).
-# v0.2 exports data for ivoyager v0.0.16 - (Godot 4.x).
+# v0.2-dev exports data for ivoyager v0.0.16-dev (Godot 4.x).
+# v0.1 exports data for ivoyager v0.0.14 to .15 (Godot 3.x).
 
 
 const EXTENSION_NAME := "ivbinary_maker"

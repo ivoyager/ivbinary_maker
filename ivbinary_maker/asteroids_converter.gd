@@ -50,7 +50,7 @@ const EXPORT_DIR := "res://ivbinary_export/asteroid_binaries"
 const BINARIES_EXTENSION := "ivbinary"
 
 # source data
-const CAT_EPOCH := 60000.0 # This changes! Check 'Epoch(MJD)' in *.cat files!
+const CAT_EPOCH := 60200.0 # This changes! Check 'Epoch(MJD)' in *.cat files!
 const J2000_SEC := (CAT_EPOCH - 51544.5) * 86400.0 # seconds from our internal J2000 epoch
 const ASTEROID_ORBITAL_ELEMENTS_NUMBERED_FILE := "allnum.cat"
 const ASTEROID_ORBITAL_ELEMENTS_MULTIOPPOSITION_FILE := "ufitobs.cat"
@@ -385,7 +385,7 @@ func make_binary_files() -> void:
 	# Write binaries
 	print("Writing binaries to ", EXPORT_DIR)
 	files.make_or_clear_dir(EXPORT_DIR)
-	var group_proxy := GroupProxy.new()
+	var sbg_proxy := SBGProxy.new()
 	for sbg_alias in group_indexes_dict:
 		var is_trojans: bool = is_trojan_group[sbg_alias]
 		for mag_str in group_indexes_dict[sbg_alias]:
@@ -394,8 +394,8 @@ func make_binary_files() -> void:
 			if n_indexes == 0:
 				continue
 			group_indexes.sort_custom(Callable(self, "_sort_group_indexes_by_mag"))
-			group_proxy.clear_for_import()
-			group_proxy.expand_arrays(n_indexes, is_trojans)
+			sbg_proxy.clear_for_import()
+			sbg_proxy.expand_arrays(n_indexes, is_trojans)
 			for i in n_indexes:
 				index = group_indexes[i]
 				var name_: String = _asteroid_names[index]
@@ -405,9 +405,9 @@ func make_binary_files() -> void:
 				for j in N_ELEMENTS:
 					elements[j] = _asteroid_elements[index * N_ELEMENTS + j]
 				if is_trojans:
-					group_proxy.set_data(name_, elements, _trojan_elements[index])
+					sbg_proxy.set_data(name_, elements, _trojan_elements[index])
 				else:
-					group_proxy.set_data(name_, elements)
+					sbg_proxy.set_data(name_, elements)
 			var file_name := "%s.%s.%s" % [sbg_alias, mag_str, BINARIES_EXTENSION]
 			_update_status(MAKE_BINARY_FILES,"%s (number indexes: %s)" % [file_name, n_indexes])
 			var path := EXPORT_DIR + "/" + file_name
@@ -416,7 +416,7 @@ func make_binary_files() -> void:
 #				print("Could not write ", path)
 				_update_status(MAKE_BINARY_FILES,"Could not write " + path)
 				return
-			group_proxy.write_binary(binary)
+			sbg_proxy.write_binary(binary)
 			binary.close()
 	
 	_update_status(MAKE_BINARY_FILES, "%s asteroids written to binaries\n(of %s total)"
