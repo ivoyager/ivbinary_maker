@@ -1,4 +1,4 @@
-# group_proxy.gd
+# sbg_proxy.gd
 # This file is part of I, Voyager
 # https://ivoyager.dev
 # *****************************************************************************
@@ -17,7 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # *****************************************************************************
-class_name GroupProxy
+class_name SBGProxy
 extends RefCounted
 
 # A mock-up of IVSmallBodiesGroup data structure helps us generate binaries.
@@ -26,85 +26,69 @@ extends RefCounted
 # IVSmallBodiesGroup data
 
 var names := PackedStringArray()
-var magnitudes := PackedFloat32Array()
 
-
-
-
-
-var e_i_Om_w := PackedColorArray() # fixed & precessing (e librates for secular resonance)
-var a_M0_n := PackedVector3Array() # librating in l-point objects
-var s_g := PackedVector2Array() # orbit precessions
-var da_D_f := PackedVector3Array() # Trojans: a amplitude, relative L amplitude, and frequency
-var th0_de := PackedVector2Array() # Trojans: libration at epoch [, & sec res: e amplitude]
-
+# packed data
+var e_i_Om_w := PackedFloat32Array() # fixed & precessing (except e in sec res)
+var a_M0_n := PackedFloat32Array() # librating in l-point objects
+var s_g_mag_de := PackedFloat32Array() # orbit precessions, magnitude, & e amplitude (sec res only)
+var da_D_f_th0 := PackedFloat32Array() # Trojans only
 
 # *****************************************************************************
 
 var _index := 0
-#var _maxes := [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-#var _mins := [INF, INF, INF, INF, INF, INF, INF, INF, INF]
-#var _load_count := 0
 
 
 func expand_arrays(n: int, is_trojans: bool) -> void:
 	var new_size := names.size() + n
 	names.resize(new_size)
-	magnitudes.resize(new_size)
-	e_i_Om_w.resize(new_size)
-	a_M0_n.resize(new_size)
-	s_g.resize(new_size)
+	e_i_Om_w.resize(new_size * 4)
+	a_M0_n.resize(new_size * 3)
+	s_g_mag_de.resize(new_size * 4)
+	
 	if is_trojans:
-		da_D_f.resize(new_size)
-		th0_de.resize(new_size)
+		da_D_f_th0.resize(new_size * 4)
 
 
 func set_data(name: String, elements: Array, trojan_elements := []) -> void:
 	names[_index] = name
 	# elements [a, e, i, Om, w, M0, n, M, mag, s, g, de]
-	magnitudes[_index] = elements[8]
-	e_i_Om_w[_index] = Color(
-		elements[1],
-		elements[2],
-		elements[3],
-		elements[4]
-	)
-	a_M0_n[_index] = Vector3(
-		elements[0],
-		elements[5],
-		elements[6]
-	)
-	s_g[_index] = Vector2(
-		elements[9],
-		elements[10]
-	)
+	
+	e_i_Om_w[_index * 4] = elements[1]
+	e_i_Om_w[_index * 4 + 1] = elements[2]
+	e_i_Om_w[_index * 4 + 2] = elements[3]
+	e_i_Om_w[_index * 4 + 3] = elements[4]
+	
+	a_M0_n[_index * 3] = elements[0]
+	a_M0_n[_index * 3 + 1] = elements[5]
+	a_M0_n[_index * 3 + 2] = elements[6]
+	
+	s_g_mag_de[_index * 4] = elements[9]
+	s_g_mag_de[_index * 4 + 1] = elements[10]
+	s_g_mag_de[_index * 4 + 2] = elements[8]
+	s_g_mag_de[_index * 4 + 3] = elements[11]
+
 	if trojan_elements:
 		# [lp_float, da, D, f, th0]
-		da_D_f[_index] = Vector3(
-			trojan_elements[1],
-			trojan_elements[2],
-			trojan_elements[3]
-		)
-		th0_de[_index] = Vector2(
-			trojan_elements[4],
-			0.0
-		)
+		
+		da_D_f_th0[_index * 4] = trojan_elements[1]
+		da_D_f_th0[_index * 4 + 1] = trojan_elements[2]
+		da_D_f_th0[_index * 4 + 2] = trojan_elements[3]
+		da_D_f_th0[_index * 4 + 3] = trojan_elements[4]
+	
 	_index += 1
 
 
 
 func write_binary(binary: FileAccess) -> void:
-	var binary_data := [names, magnitudes, e_i_Om_w, a_M0_n, s_g, da_D_f, th0_de]
+	var binary_data := [names, e_i_Om_w, a_M0_n, s_g_mag_de, da_D_f_th0]
 	binary.store_var(binary_data)
 
 
 func clear_for_import() -> void:
-	names.resize(0)
-	magnitudes.resize(0)
-	e_i_Om_w.resize(0)
-	a_M0_n.resize(0)
-	s_g.resize(0)
-	da_D_f.resize(0)
-	th0_de.resize(0)
+	names.clear()
+	e_i_Om_w.clear()
+	a_M0_n.clear()
+	s_g_mag_de.clear()
+	da_D_f_th0.clear()
 	_index = 0
 
