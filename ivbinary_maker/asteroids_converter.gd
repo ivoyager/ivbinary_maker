@@ -117,9 +117,10 @@ func revise_names() -> void:
 	if !read_file:
 		_update_status(REVISE_NAMES, "Could not open " + path)
 		return
-	var line: String = read_file.get_line()
 	var status_index := STATUS_INTERVAL
-	while !read_file.eof_reached():
+	var file_length := read_file.get_length()
+	while read_file.get_position() < file_length:
+		var line: String = read_file.get_line()
 		var number := int(line.substr(0, 6))
 		assert(number == index + 1)
 		assert(number == int(_asteroid_names[index]))
@@ -143,7 +144,6 @@ func revise_names() -> void:
 						% [count, _asteroid_names[index], astdys2_name])
 				status_index += STATUS_INTERVAL
 			_asteroid_names[index] = astdys2_name
-		line = read_file.get_line()
 		index += 1
 	read_file.close()
 	_update_status(REVISE_NAMES, str(count) + " renamed")
@@ -162,10 +162,10 @@ func revise_proper() -> void:
 		if !read_file:
 			_update_status(REVISE_PROPER, "Could not open " + path)
 			continue
-		var line := read_file.get_line()
-		while not read_file.eof_reached():
+		var file_length := read_file.get_length()
+		while read_file.get_position() < file_length:
+			var line: String = read_file.get_line()
 			if line.substr(0, 1) == "%":
-				line = read_file.get_line()
 				continue
 			var line_array := line.split(" ", false)
 			var astdys2_name: String = line_array[0]
@@ -174,7 +174,6 @@ func revise_proper() -> void:
 				index = _astdys2_lookup[astdys2_name]
 			else:
 				n_not_found += 1
-				line = read_file.get_line()
 				continue
 			var proper_a := float(line_array[2]) * AU
 			var proper_e := float(line_array[3]) # really de in secular resonant
@@ -204,7 +203,6 @@ func revise_proper() -> void:
 			if revised == status_index:
 				_update_status(REVISE_PROPER, "%s orbits revised to proper" % revised)
 				status_index += STATUS_INTERVAL
-			line = read_file.get_line()
 		read_file.close()
 	_update_status(REVISE_PROPER, "%s orbits revised to proper\n(Did not find %s)" % [revised, n_not_found])
 
@@ -220,10 +218,10 @@ func revise_trojans() -> void:
 #		print("Could not open ", path)
 		_update_status(REVISE_TROJANS, "Could not open " + path)
 		return
-	var line := read_file.get_line()
-	while not read_file.eof_reached():
+	var file_length := read_file.get_length()
+	while read_file.get_position() < file_length:
+		var line: String = read_file.get_line()
 		if line.substr(0, 1) == "%":
-			line = read_file.get_line()
 			continue
 		var line_array := line.split(" ", false)
 		var astdys2_name: String = line_array[0]
@@ -232,7 +230,6 @@ func revise_trojans() -> void:
 			index = _astdys2_lookup[astdys2_name]
 		else:
 			n_not_found += 1
-			line = read_file.get_line()
 			continue
 		var da := float(line_array[2]) * AU
 		var D := deg_to_rad(float(line_array[3])) # deg -> rad
@@ -263,7 +260,6 @@ func revise_trojans() -> void:
 		if revised == status_index:
 			_update_status(REVISE_TROJANS, "%s orbits revised to proper" % revised)
 			status_index += STATUS_INTERVAL
-		line = read_file.get_line()
 	read_file.close()
 	_update_status(REVISE_TROJANS, "%s orbits revised to proper\n(Did not find %s)"
 			% [revised, n_not_found])
@@ -451,22 +447,26 @@ func _read_astdys_cat_file(data_file: String, func_type: int) -> void:
 		return
 	var line := read_file.get_line()
 	while line.substr(0, 1) != "!":
-		line = read_file.get_line()
-	line = read_file.get_line() # data starts after line starting with "!"
+		line = read_file.get_line() # data starts after line starting with "!"
 	var status_index := _index + STATUS_INTERVAL
-	while not read_file.eof_reached():
+	var file_length := read_file.get_length()
+	while read_file.get_position() < file_length:
+		line = read_file.get_line()
 		var line_array := line.split(" ", false)
 		var mag_str: String = line_array[8]
 		if mag_str == "-9.99":
 			if REJECT_999:
-				line = read_file.get_line()
 				continue
 			else:
 				mag_str = "99"
 		var astdys2_name: String = line_array[0]
 		astdys2_name = astdys2_name.replace("'", "")
 		
-		assert(!_astdys2_lookup.has(astdys2_name), "Duplicate name: " + astdys2_name)
+		if _astdys2_lookup.has(astdys2_name):
+			print("Duplicate name: " + astdys2_name + "; skipping...")
+			continue
+		
+#		assert(!_astdys2_lookup.has(astdys2_name), "Duplicate name: " + astdys2_name)
 		
 		_astdys2_lookup[astdys2_name] = _index
 		_asteroid_names.append(astdys2_name)
@@ -496,7 +496,6 @@ func _read_astdys_cat_file(data_file: String, func_type: int) -> void:
 		for _i in range(N_ELEMENTS - 9):
 			_asteroid_elements.append(0.0) # will be s, g, de from propers
 		
-		line = read_file.get_line()
 		_index += 1
 		if _index == status_index:
 			_update_status(func_type, str(_index) + " total asteroids (current: "
