@@ -26,7 +26,7 @@ const EXTENSION_NAME := "ivbinary_maker"
 const EXTENSION_VERSION := "0.2"
 const EXTENSION_BUILD := ""
 const EXTENSION_STATE := "dev"
-const EXTENSION_YMD := 20230922
+const EXTENSION_YMD := 20230925
 
 
 func _extension_init() -> void:
@@ -39,6 +39,7 @@ func _extension_init() -> void:
 	IVProjectBuilder.program_nodes.clear()
 	IVProjectBuilder.gui_nodes.clear()
 	IVProjectBuilder.procedural_objects.clear()
+	IVProjectBuilder.initializers[&"TableInitializer"] = IVTableInitializer
 	
 	# ivbinary_maker
 	IVProjectBuilder.program_refcounteds[&"_AsteroidsConverter_"] = AsteroidsConverter

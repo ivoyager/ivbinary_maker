@@ -10,7 +10,7 @@ Converts raw source data into binary and texture files for use in I, Voyager.
 
 Download raw data files into folders described below:
 
-## source_asteroids
+## source_data/asteroids
 #### Required!
 Download from: https://newton.spacedys.com/astdys/ (Asteroids - Dynamic Site)   
 
@@ -38,7 +38,7 @@ http://newton.dm.unipi.it/neodys
 * neodys.ctc	- Equinoctial elements with covariance matrices
 * catalog.tot	- Proper elements and encounter conditions
 			
-## source_rings
+## source_data/rings
 Source: Björn Jónsson, https://bjj.mmedia.is/data/s_rings
 * backscattered.txt
 * forwardscattered.txt

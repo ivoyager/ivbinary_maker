@@ -28,6 +28,10 @@ extends RefCounted
 var names := PackedStringArray()
 var magnitudes := PackedFloat32Array()
 
+
+
+
+
 var e_i_Om_w := PackedColorArray() # fixed & precessing (e librates for secular resonance)
 var a_M0_n := PackedVector3Array() # librating in l-point objects
 var s_g := PackedVector2Array() # orbit precessions
